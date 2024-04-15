@@ -11,15 +11,17 @@
 
 > https://en.wikipedia.org/wiki/Unit_testing
 
-### Motivation (Compile-time first unit-testing is a super power of modern C++)
+### Motivation
 
 - Compile-time tests should catch errors ealier
 - Compile-time tests should help (to a certain degree) avoid memory leaks and undefined behaviors
 - Compile-time tests should have good error messages
-- Run-time tests can be used when compile-time tests can't (for example goto/exceptions/reinterpret_cast/... in C++20)
+- Compile-time tests should be executed by default
+- Run-time tests should be used when compile-time tests can't (for example goto/exceptions/reinterpret_cast/... in C++20)
 - Run-time tests can be used for code coverage
 - Run-time tests can be used for easier debugging
 - Run-time tests can be used for CI reporting
+- Run-time tests vs Compile-time tests choice should belong to the user
 
 ### Features
 
