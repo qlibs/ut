@@ -311,7 +311,9 @@ template<fixed_string Str>
 /**
  * Compile time expression
  * @code
- * expect(constant<42_i == 42>); // forces compile-time evaluation
+ * expect(constant<42_i == 42>); // forces compile-time evaluation and run-time check
+ * auto i = 0;
+ * expect(constant<i == 42_i>);  // compile-time error
  * @encode
  */
 template<auto Expr> inline constexpr auto constant;

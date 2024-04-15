@@ -267,7 +267,7 @@ struct test {
 template<utility::fixed_string Str>
 [[nodiscard]] constexpr auto operator""_test() { return detail::test<Str>{}; }
 
-template<auto Expr> inline constexpr auto constant = [] { static_assert(Expr, "[FAILED]"); return Expr; }();
+template<auto Expr> inline constexpr auto constant = Expr;
 template<class T> [[nodiscard]] constexpr auto& mut(const T& t) { return const_cast<T&>(t); }
 
 template<class TLhs, class TRhs> struct eq {
