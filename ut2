@@ -74,9 +74,9 @@ class outputter {
   constexpr auto on(const events::summary& event) {
     if (!__builtin_is_constant_evaluated()) {
       if (event.asserts[events::summary::FAILED] || event.tests[events::summary::FAILED]) {
-          os << "\n---> " << "FAILED" << ": ";
+          os << "\nFAILED: ";
       } else {
-          os << "---> " << "PASSED" << ": ";
+          os << "PASSED: ";
       }
       os << "tests: " << (event.tests[events::summary::PASSED] + event.tests[events::summary::FAILED]) << " ("
          <<  event.tests[events::summary::PASSED] << " passed, "

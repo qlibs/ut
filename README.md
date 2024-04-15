@@ -52,7 +52,7 @@ int main() {
 ```
 
 ```sh
----> PASSED: tests: 1 (1 passed, 0 failed, 1 compile-time), asserts: 3 (3 passed, 0 failed)
+PASSED: tests: 1 (1 passed, 0 failed, 1 compile-time), asserts: 3 (3 passed, 0 failed)
 ```
 
 ---
@@ -300,7 +300,7 @@ template <class...> inline auto cfg = default_cfg{};
     ```
 
 - Similar projects?
-    > [ut](https://github.com/boost-ext/ut), [Catch2](https://github.com/catchorg/Catch2), [googltest](https://github.com/google/googletest), [GUnit](https://github.com/cpp-testing/GUnit), [boost.test](https://www.boost.org/doc/libs/latest/libs/test/doc/html/index.html)
+    > [ut](https://github.com/boost-ext/ut), [catch2](https://github.com/catchorg/Catch2), [googletest](https://github.com/google/googletest), [gunit](https://github.com/cpp-testing/GUnit), [boost.test](https://www.boost.org/doc/libs/latest/libs/test/doc/html/index.html)
 
 ---
 
