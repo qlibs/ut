@@ -73,7 +73,9 @@ class outputter {
   }
   constexpr auto on(const events::summary& event) {
     if (!__builtin_is_constant_evaluated()) {
-      if (event.asserts[events::summary::FAILED] || event.tests[events::summary::FAILED]) {
+      if (!(event.asserts[events::summary::PASSED] + event.asserts[events::summary::FAILED])) {
+          os << "FAILED: ";
+      } else if (event.asserts[events::summary::FAILED] || event.tests[events::summary::FAILED]) {
           os << "\nFAILED: ";
       } else {
           os << "PASSED: ";
@@ -191,7 +193,7 @@ struct override { };
  * template<class... Ts> auto ut::cfg<ut::override, Ts...> = my_config{};
  * @endcode
  */
-template <class...> inline auto cfg = default_cfg{};
+template <class...> inline default_cfg cfg{};
 
 namespace detail {
 template<class... Ts>
