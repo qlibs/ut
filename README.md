@@ -253,7 +253,7 @@ echo $? # 139 # no output
 <a name="comp"></a>
 ### Compilation times (no iostream)
 
-> [include] https://raw.githubusercontent.com/boost-ext/reflect/main/reflect
+> [include] https://raw.githubusercontent.com/boost-ext/ut2/main/ut2
 
 ```cpp
 time g++-13.2 -x c++ -std=c++20 ut2 -c -DDISABLE_STATIC_ASSERT_TESTS   # 0.022s
@@ -541,7 +541,7 @@ template <class...> inline auto cfg = default_cfg{};
       GIT_TAG v2.0.0
     )
     add_library(ut2 INTERFACE)
-    target_include_directories(ut2 SYSTEM INTERFACE ${reflect_SOURCE_DIR})
+    target_include_directories(ut2 SYSTEM INTERFACE ${ut2_SOURCE_DIR})
     add_library(ut2::ut2 ALIAS ut2)
     ```
 
