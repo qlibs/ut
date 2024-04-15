@@ -150,7 +150,7 @@ struct runner {
         return false;
       }
     } else {
-      #if !defined(UT_RUNTIME_ONLY)
+      #if !defined(UT_RUN_TIME_ONLY)
         if constexpr (!type_traits::is_mutable_lambda_v<decltype(&Test::operator())> && !type_traits::has_capture_lambda_v<Test>) {
           reporter.on(events::test_begin<events::mode::compile_time>{file_name, line, name});
           static_assert((test(), "[FAILED]"));
@@ -187,7 +187,7 @@ struct override { };
  * Customization point to override the default configuration
  *
  * @code
- * template<class... Ts> inline constexpr auto ut::cfg<ut::override, Ts...> = my_oncifg{};
+ * template<class... Ts> auto ut::cfg<ut::override, Ts...> = my_config{};
  * @endcode
  */
 template <class...> inline auto cfg = default_cfg{};
