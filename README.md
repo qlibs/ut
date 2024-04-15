@@ -238,9 +238,9 @@ echo $? # 139 # no output
 ---
 
 <a name="comp"></a>
-### Compilation times (no iostream)
+### Compilation times
 
-> [include] https://raw.githubusercontent.com/boost-ext/ut2/main/ut2
+> [include] https://raw.githubusercontent.com/boost-ext/ut2/main/ut2 (no iostream)
 
 ```cpp
 time g++-13 -x c++ -std=c++20 ut2 -c -DDISABLE_STATIC_ASSERT_TESTS   # 0.022s
