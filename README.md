@@ -484,7 +484,7 @@ template <class...> inline auto cfg = default_cfg{};
     CPMAddPackage(
       Name ut2
       GITHUB_REPOSITORY boost-ext/ut2
-      GIT_TAG v1.1.1
+      GIT_TAG v2.0.0
     )
     add_library(ut2 INTERFACE)
     target_include_directories(ut2 SYSTEM INTERFACE ${reflect_SOURCE_DIR})
