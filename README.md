@@ -121,8 +121,8 @@ PASSED: tests: 2 (2 passed, 0 failed, 1 compile-time), asserts: 4 (4 passed, 0 f
 int main() {
   "expect"_test = [] {
     "different ways"_test = [] {
-      expect(42 == 42_i);
-      expect(eq(42, 42)) << "same as expect(42 == 42_i)";
+      expect(42_i == 42);
+      expect(eq(42, 42))   << "same as expect(42_i == 42)";
       expect(_i(42) == 42) << "same as expect(42_i == 42)";
     };
 
@@ -132,7 +132,7 @@ int main() {
 
     "fatal"_test = [] mutable { // at run-time
       std::vector<int> v{1};
-      expect[v.size() > 1_ul] << "fatal, stops running tests further";
+      expect[v.size() > 1_ul] << "fatal, aborts further execution";
       expect(v[1] == 42_i); // not executed
     };
 
@@ -258,12 +258,12 @@ time clang++-17 -x c++ -std=c++20 ut2 -c                               # 0.049s
  * @code
  * expect(42 == 42_i);
  * expect(42 == 42_i) << "log";
- * expect[42 == 42_i]; // fatal assertion
+ * expect[42 == 42_i]; // fatal assertion, aborts further execution
  * @endcode
  */
 inline constexpr struct {
   constexpr auto operator()(auto expr);
-  constexpr auto operator[](auto expr); // fatal
+  constexpr auto operator[](auto expr);
 } expect{};
 ```
 
