@@ -334,13 +334,13 @@ template<class T> [[nodiscard]] constexpr auto& mut(const T&);
 ```
 
 ```cpp
-template<class TLhs, class TRhs> struct eq;  /// equal
-template<class TLhs, class TRhs> struct neq; /// not equal
-template<class TLhs, class TRhs> struct gt;  /// greater
-template<class TLhs, class TRhs> struct ge;  /// greater equal
-template<class TLhs, class TRhs> struct lt;  /// less
-template<class TLhs, class TRhs> struct le;  /// less equal
-template<class TLhs, class TRhs> struct nt;  /// not
+template<class TLhs, class TRhs> struct eq;  // equal
+template<class TLhs, class TRhs> struct neq; // not equal
+template<class TLhs, class TRhs> struct gt;  // greater
+template<class TLhs, class TRhs> struct ge;  // greater equal
+template<class TLhs, class TRhs> struct lt;  // less
+template<class TLhs, class TRhs> struct le;  // less equal
+template<class TLhs, class TRhs> struct nt;  // not
 ```
 
 ```cpp
@@ -354,30 +354,30 @@ constexpr auto operator! (const auto& t)                    -> decltype(nt{t});
 ```
 
 ```cpp
-struct _b;      /// bool (true_b = _b{true}, false_b = _b{false})
-struct _c;      /// char
-struct _sc;     /// signed char
-struct _s;      /// short
-struct _i;      /// int
-struct _l;      /// long
-struct _ll;     /// long long
-struct _u;      /// unsigned
-struct _uc;     /// unsigned char
-struct _us;     /// unsigned short
-struct _ul;     /// unsigned long
-struct _ull;    /// unsigned long long
-struct _f;      /// float
-struct _d;      /// double
-struct _ld;     /// long double
-struct _i8;     /// int8_t
-struct _i16;    /// int16_t
-struct _i32;    /// int32_t
-struct _i64;    /// int64_t
-struct _u8;     /// uint8_t
-struct _u16;    /// uint16_t
-struct _u32;    /// uint32_t
-struct _u64;    /// uint64_t
-struct _string; /// const char*
+struct _b;      // bool (true_b = _b{true}, false_b = _b{false})
+struct _c;      // char
+struct _sc;     // signed char
+struct _s;      // short
+struct _i;      // int
+struct _l;      // long
+struct _ll;     // long long
+struct _u;      // unsigned
+struct _uc;     // unsigned char
+struct _us;     // unsigned short
+struct _ul;     // unsigned long
+struct _ull;    // unsigned long long
+struct _f;      // float
+struct _d;      // double
+struct _ld;     // long double
+struct _i8;     // int8_t
+struct _i16;    // int16_t
+struct _i32;    // int32_t
+struct _i64;    // int64_t
+struct _u8;     // uint8_t
+struct _u16;    // uint16_t
+struct _u32;    // uint32_t
+struct _u64;    // uint64_t
+struct _string; // const char*
 ```
 
 ```cpp
