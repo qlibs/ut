@@ -1,7 +1,7 @@
 <a href="http://www.boost.org/LICENSE_1_0.txt" target="_blank">![Boost Licence](http://img.shields.io/badge/license-boost-blue.svg)</a>
 <a href="https://github.com/boost-ext/ut2/releases" target="_blank">![Version](https://badge.fury.io/gh/boost-ext%2Fut2.svg)</a>
 <a href="https://godbolt.org/z/cbshMjocd">![build](https://img.shields.io/badge/build-blue.svg)</a>
-<a href="">![Try it online](https://img.shields.io/badge/try%20it-online-blue.svg)</a>
+<a href="https://godbolt.org/z/9jbzh3h4W">![Try it online](https://img.shields.io/badge/try%20it-online-blue.svg)</a>
 
 ---------------------------------------
 
@@ -20,7 +20,7 @@
 - Explicit by design (no implicit conversions, narrowing, epsilon-less floating point comparisions, etc)
 - Minimal [API](#api)
 - Reflection integration (optional via https://github.com/boost-ext/reflect)
-- Compiles cleanly with ([`-fno-exceptions -fno-rtti -Wall -Wextra -Werror -pedantic -pedantic-errors`](https://godbolt.org/z/M747ocGfx))
+- Compiles cleanly with ([`-fno-exceptions -fno-rtti -Wall -Wextra -Werror -pedantic -pedantic-errors`](https://godbolt.org/z/cbshMjocd))
 - Fast compilation times (see [compilation times](#comp))
 - Verifies itself upon include (aka run all tests via static_asserts but it can be disabled - see [FAQ](#faq))
 
@@ -28,7 +28,7 @@
 
 ### Requirements
 
-- C++20 ([gcc-12+, clang-16+](https://godbolt.org/z/xPc19Moef))
+- C++20 ([gcc-12+, clang-16+](https://godbolt.org/z/cbshMjocd))
     - No STL required (optionally - iostream and cstdint)
 
 ---
@@ -81,9 +81,10 @@ int main() {
 $CXX example.cpp -std=c++20 # -DUT_COMPILE_TIME_ONLY
 ut2:156:25: error: static_assert((test(), "[FAILED]"));
 example.cpp:13:44: note:"sum [compile-time and run-time]"_test
-example.cpp:14:5:  note: in call to 'expect.operator()<ut::eq<int, int>>({6, 5})
-  expect(sum(1, 2, 3) == 5_i);
+example.cpp:14:5:  note: in call to 'expect.operator()<ut::eq<int, int>>({6, 5})'
+```
 
+```sh
 $CXX example.cpp -std=c++20 -o example && ./example
 /app/example.cpp:14:FAILED:"sum [compile-time and run-time]": 6 == 5
 FAILED: tests: 3 (2 passed, 1 failed, 0 compile-time), asserts: 2 (1 passed, 1 failed)
@@ -182,7 +183,7 @@ int main() {
     auto f = foo{.a=1, .b=2};
     expect(eq(foo{1, 2}, f));
     expect(members(foo{1, 2}) == members(f));
-    expect[names(foo{}) == names(bar{})];
+    expect(names(foo{}) == names(bar{}));
   };
 };
 ```
@@ -453,14 +454,24 @@ template <class...> inline auto cfg = default_cfg{};
 
 ```cpp
 #define UT2 2'0'0                   // Current library version (SemVer)
-#define UT_RUN_TIME_ONLY            // If defined only run-time tests will be executed + static_assert tests
-#define UT_COMPILE_TIME_ONLY        // If defined only compile-time tests will be executed
-#define DISABLE_STATIC_ASSERT_TESTS // If defined it disables running static_asserts tests for the UT library (user tests are not affected)
+#define UT_RUN_TIME_ONLY            // If defined tests will be executed
+                                    // at run-time + static_assert tests
+#define UT_COMPILE_TIME_ONLY        // If defined only compile-time tests
+                                    // will be executed
+#define DISABLE_STATIC_ASSERT_TESTS // If defined it disables running
+                                    // static_asserts tests for the UT library
+                                    // (user tests are not affected)
 ```
 
 ---
 
 ### FAQ
+
+- How does UT2 compare to https://github.com/boost-ext/ut?
+
+  > UT2 ideas are based on UT. UT2 aim is not to replace UT.
+    UT2 is minimal (no STL required).
+    UT2 has different execution model (can run tests at compile-time and/or run-time).
 
 - Can I disable running tests at compile-time for faster compilation times?
 
