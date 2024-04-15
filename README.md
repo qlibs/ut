@@ -44,7 +44,7 @@ constexpr auto sum(auto... args) { return (args + ...); }
 
 int main() {
   "sum"_test = [] {
-    expect(sum(1, 2, 3) == 3_i);
+    expect(sum(1, 2, 3) == 6_i);
   };
 }
 ```
