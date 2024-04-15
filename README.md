@@ -241,24 +241,19 @@ echo $? # 139 # no output
 <a name="comp"></a>
 ### Compilation times
 
-> [include] https://raw.githubusercontent.com/boost-ext/ut2/main/ut2 (no iostream)
+> Include - no iostream (https://raw.githubusercontent.com/boost-ext/ut2/main/ut2)
 
 ```cpp
-time g++-13 -x c++ -std=c++20 ut2 -c -DDISABLE_STATIC_ASSERT_TESTS   # 0.022s
-time g++-13 -x c++ -std=c++20 ut2 -c                                 # 0.042s
+time $CXX -x c++ -std=c++20 ut2 -c -DDISABLE_STATIC_ASSERT_TESTS # 0.028s
+time $CXX -x c++ -std=c++20 ut2 -c                               # 0.049s
 ```
 
-```cpp
-time clang++-17 -x c++ -std=c++20 ut2 -c -DDISABLE_STATIC_ASSERT_TESTS # 0.028s
-time clang++-17 -x c++ -std=c++20 ut2 -c                               # 0.049s
-```
-
-> [benchmark (100 tests, 1000 asserts)] https://godbolt.org/z/ezj4ndn3e
+> Benchmark - 100 tests, 1000 asserts (https://godbolt.org/z/ezj4ndn3e)
 
 ```cpp
-[ut]:  time clang++-17 benchmark.cpp -std=c++20                               # 0m13.498s
-[ut2]: time clang++-17 benchmark.cpp -std=c++20                               # 0m0.813s
-[ut2]: time clang++-17 benchmark.cpp -std=c++20 -DDISABLE_STATIC_ASSERT_TESTS # 0m0.758s
+[ut]:  time $CXX benchmark.cpp -std=c++20                               # 0m13.498s
+[ut2]: time $CXX benchmark.cpp -std=c++20                               # 0m0.813s
+[ut2]: time $CXX benchmark.cpp -std=c++20 -DDISABLE_STATIC_ASSERT_TESTS # 0m0.758s
 -------------------------------------------------------------------------
 [ut]  https://github.com/boost-ext/ut/releases/tag/v2.0.1
 [ut2] https://github.com/boost-ext/ut2/releases/tag/v2.0.0
