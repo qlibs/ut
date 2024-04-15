@@ -13,15 +13,20 @@
 
 ### Motivation
 
-- **Compile-time tests** should catch errors ealier
-- **Compile-time tests** should help (to a certain degree) avoid memory leaks and undefined behaviors
-- **Compile-time tests** should have good error messages
-- **Compile-time tests** should be executed by default
-- **Run-time tests** should be used when compile-time tests can't
-- **Run-time tests** can be used for code coverage
-- **Run-time tests** can be used for easier debugging
-- **Run-time tests** can be used for CI reporting
-- **Run-time tests vs Compile-time tests** choice should belong to the user
+- Compile-time tests
+  - should catch errors ealier
+  - should help (to a certain degree) avoid memory leaks and undefined behaviors
+  - should have good error messages
+  - should be executed by default
+
+- Run-time tests
+  - should be used when compile-time tests can't
+  - should be able to be used for code coverage
+  - should be able to be used for debugging
+  - should be able to be used for CI reporting
+
+- Run-time tests vs Compile-time tests
+  - choice should belong to the user
 
 ### Features
 
