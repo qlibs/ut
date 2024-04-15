@@ -7,7 +7,7 @@
 
 > "If you liked it then you `"should have put a"_test` on it", Beyonce rule
 
-## C++20 minimal/compile-time first unit-testing library
+## UT2: C++20 minimal/compile-time first unit-testing library
 
 > https://en.wikipedia.org/wiki/Unit_testing
 
@@ -22,7 +22,7 @@
 > Additionally there is case for the code coverage, debugging and CI reporting.
 > Therefore, the combination of both seems the most powerful: compile-time tests with nicer error messages and run-time execution on top (with ability choose the execution model globally and/or for specific tests).
 
-`ut2` is trying to accomplish just that.
+* UT2 is trying to accomplish just that.
 
 ### Features
 
