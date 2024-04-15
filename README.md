@@ -19,7 +19,7 @@
     - Detects memory leaks and UBs at compile-time*
 - Explicit by design (no implicit conversions, narrowing, epsilon-less floating point comparisions, etc)
 - Minimal [API](#api)
-- Optionally integrates with reflection (via https://github.com/boost-ext/reflect)
+- Reflection integration (optional via https://github.com/boost-ext/reflect)
 - Compiles cleanly with ([`-fno-exceptions -fno-rtti -Wall -Wextra -Werror -pedantic -pedantic-errors`](https://godbolt.org/z/M747ocGfx))
 - Fast compilation times (see [compilation times](#comp))
 - Verifies itself upon include (aka run all tests via static_asserts but it can be disabled - see [FAQ](#faq))
@@ -50,6 +50,7 @@ int main() {
 ```
 
 ```sh
+$CXX example.cpp -std=c++20 -o example && ./example
 PASSED: tests: 1 (1 passed, 0 failed, 1 compile-time), asserts: 1 (1 passed, 0 failed)
 ```
 
@@ -61,16 +62,16 @@ static_assert(("compile time only"_test = [] {
 }));
 
 int main() {
-  "sum [compile-time and run-time]"_test = [] {   // default: constexpr = compile-time and run-time
+  "sum [compile-time and run-time]"_test = [] {   // default: compile-time and run-time
     expect(sum(1, 2, 3) == 5_i);                  // fails at compile-time and/or run-ime
-                                                  // note: error: expect.operator()<ut::eq<int, int>>({6, 5})
+    // error: expect.operator()<ut::eq<int, int>>({6, 5})
   };
 
   "sum [run-time only]"_test = [] mutable {       // mutable = run-time only
     expect(sum(1, 2, 3) == 6_i);                  // fails at run-time
   };
 
-  "sum [compile-time only]"_test = [] consteval { // conteval = compile-time only (requires C++23)
+  "sum [compile-time only]"_test = [] consteval { // conteval = compile-time only (C++23)
     expect(sum(1, 2, 3) == 6_i);                  // fails at compile-time
   };
 }
@@ -78,20 +79,12 @@ int main() {
 
 ```sh
 $CXX example.cpp -std=c++20 # -DUT_COMPILE_TIME_ONLY
-```
-
-```sh
 ut2:156:25: error: static_assert((test(), "[FAILED]"));
 example.cpp:13:44: note:"sum [compile-time and run-time]"_test
 example.cpp:14:5:  note: in call to 'expect.operator()<ut::eq<int, int>>({6, 5})
   expect(sum(1, 2, 3) == 5_i);
-```
 
-```sh
-$CXX example.cpp -DUT_RUN_TIME_ONLY
-```
-
-```sh
+$CXX example.cpp -std=c++20 -o example && ./example
 /app/example.cpp:14:FAILED:"sum [compile-time and run-time]": 6 == 5
 FAILED: tests: 3 (2 passed, 1 failed, 0 compile-time), asserts: 2 (1 passed, 1 failed)
 ```
@@ -117,6 +110,7 @@ int main() { }
 ```
 
 ```sh
+$CXX example.cpp -std=c++20 -o example && ./example
 PASSED: tests: 2 (2 passed, 0 failed, 1 compile-time), asserts: 4 (4 passed, 0 failed)
 ```
 
@@ -149,6 +143,7 @@ int main() {
 ```
 
 ```sh
+$CXX example.cpp -std=c++20 -o example && ./example
 example.cpp:21:FAILED:"fatal": 1 > 1
 FAILED: tests: 3 (2 passed, 1 failed, 3 compile-time), asserts: 5 (4 passed, 1 failed)
 ```
@@ -176,10 +171,81 @@ int main() {
 
 ---
 
-### More examples
+> Reflection integration (https://godbolt.org/z/5T51odcfP)
 
-- [feature] Reflection integration - https://godbolt.org/z/5T51odcfP
-- [feature] Custom configuration   - https://godbolt.org/z/oqfjesT6E
+```cpp
+int main() {
+  struct foo { int a; int b; };
+  struct bar { int a; int b; };
+
+  "reflection"_test = [] {
+    auto f = foo{.a=1, .b=2};
+    expect(eq(foo{1, 2}, f));
+    expect(members(foo{1, 2}) == members(f));
+    expect[names(foo{}) == names(bar{})];
+  };
+};
+```
+
+```sh
+$CXX example.cpp -std=c++20 -o example && ./example
+PASSED: tests: 1 (1 passed, 0 failed, 1 compile-time), asserts: 3 (3 passed, 0 failed)
+```
+
+> Custom configuration (https://godbolt.org/z/oqfjesT6E)
+
+```cpp
+struct outputter {
+  template<ut::events::mode Mode>
+  constexpr auto on(const ut::events::test_begin<Mode>&) { }
+  template<ut::events::mode Mode>
+  constexpr auto on(const ut::events::test_end<Mode>&) { }
+  template<class TExpr>
+  constexpr auto on(const ut::events::assert_pass<TExpr>&) { }
+  template<class TExpr>
+  constexpr auto on(const ut::events::assert_fail<TExpr>&) { }
+  constexpr auto on(const ut::events::fatal&) { }
+  constexpr auto on(const ut::events::summary&) { }
+  template<class TMsg>
+  constexpr auto on(const ut::events::log<TMsg>&) { }
+};
+
+struct custom_config {
+  ::outputter outputter{};
+  ut::reporter<decltype(outputter)> reporter{outputter};
+  ut::runner<decltype(reporter)> runner{reporter};
+} config{};
+
+template<class... Ts> auto& ut::cfg<ut::override, Ts...> = ::config;
+
+int main() {
+  "config"_test = []() mutable {
+    expect(42 == 43_i); // no output
+  };
+};
+```
+
+```sh
+$CXX example.cpp -std=c++20 -o example && ./example
+echo $? # 139 # no output
+```
+
+---
+
+<a name="comp"></a>
+### Compilation times (no iostream)
+
+> [include] https://raw.githubusercontent.com/boost-ext/reflect/main/reflect
+
+```cpp
+time g++-13.2 -x c++ -std=c++20 ut2 -c -DDISABLE_STATIC_ASSERT_TESTS   # 0.022s
+time g++-13.2 -x c++ -std=c++20 ut2 -c                                 # 0.042s
+```
+
+```cpp
+time clang++-17 -x c++ -std=c++20 ut2 -c -DDISABLE_STATIC_ASSERT_TESTS # 0.028s
+time clang++-17 -x c++ -std=c++20 ut2 -c                               # 0.049s
+```
 
 ---
 

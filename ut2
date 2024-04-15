@@ -8,6 +8,8 @@
 #ifndef UT
 #define UT 2'0'0
 
+#define __has_include(...) 0
+
 #if __has_include(<iostream>)
 #include <iostream> // [optional] std::clog
 #endif
@@ -176,7 +178,7 @@ struct default_cfg {
   ut::outputter<decltype(std::clog)> outputter{std::clog};
 #else
   struct { template<class T> constexpr auto& operator<<(const T&) const { return *this; } } null_stream{};
-  ut::outputter<decltype(detail::null_stream)> outputter{detail::null_stream};
+  ut::outputter<decltype(null_stream)> outputter{null_stream};
 #endif
   ut::reporter<decltype(outputter)> reporter{outputter};
   ut::runner<decltype(reporter)> runner{reporter};
