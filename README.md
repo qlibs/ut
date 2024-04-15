@@ -17,7 +17,7 @@
     - Easy integration (see [FAQ](#faq))
 - Compile-time first (executes tests at compile-time and/or run-time)
     - Detects memory leaks and UBs at compile-time*
-- Explicit by design (no implicit conversions, narrowing, epsilon-less floating point comparisions, etc)
+- Explicit by design (no implicit conversions, narrowing, epsilon-less floating point comparisions, ...)
 - Minimal [API](#api)
 - Reflection integration (optional via https://github.com/boost-ext/reflect)
 - Compiles cleanly with ([`-fno-exceptions -fno-rtti -Wall -Wextra -Werror -pedantic -pedantic-errors`](https://godbolt.org/z/cbshMjocd))
@@ -158,14 +158,14 @@ int main() {
   };
 
   "ub"_test = [] {
-     int* i{};
-     *i = 42; // compile-time error
+    int* i{};
+    *i = 42; // compile-time error
   };
 
   "errors"_test = [] {
-     expect(42_i == short(42)); // [ERROR] Comparision of different types is not allowed
-     expect(42 == 42);          // [ERROR] Expression required: expect(42_i == 42)
-     expect(4.2 == 4.2_d);      // [ERROR] Epsilon is required: expect((4.2 == 4.2_d)(.1))
+    expect(42_i == short(42)); // [ERROR] Comparision of different types is not allowed
+    expect(42 == 42);          // [ERROR] Expression required: expect(42_i == 42)
+    expect(4.2 == 4.2_d);      // [ERROR] Epsilon is required: expect((4.2 == 4.2_d)(.1))
   };
 }
 ```
