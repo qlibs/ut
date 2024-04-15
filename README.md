@@ -267,14 +267,14 @@ time clang++-17 -x c++ -std=c++20 ut2 -c                               # 0.049s
 <a name="perf"></a>
 ### Performance
 
-> [benchmark (100 tests, 1000 asserts)] https://godbolt.org/z/ezj4ndn3e
+> Benchmark - 100 tests, 1000 asserts (https://godbolt.org/z/ezj4ndn3e)
 
 ```cpp
 time ./benchmark # 0m0.002s (-O3)
 time ./benchmark # 0m0.013s (-g)
 ```
 
-> [x86-64 assembly (-O3)] https://godbolt.org/z/qKs47PP9G
+> X86-64 assembly -O3 (https://godbolt.org/z/qKs47PP9G)
 
 ```cpp
 int main() {
