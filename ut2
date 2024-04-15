@@ -8,8 +8,6 @@
 #ifndef UT
 #define UT 2'0'0
 
-#define __has_include(...) 0
-
 #if __has_include(<iostream>)
 #include <iostream> // [optional] std::clog
 #endif
