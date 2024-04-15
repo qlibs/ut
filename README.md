@@ -11,23 +11,6 @@
 
 > https://en.wikipedia.org/wiki/Unit_testing
 
-### Motivation
-
-- Compile-time tests
-  - should catch errors ealier
-  - should help (to a certain degree) avoid memory leaks and undefined behaviors
-  - should have good error messages
-  - should be executed by default
-
-- Run-time tests
-  - should be used when compile-time tests can't
-  - should be able to be used for code coverage
-  - should be able to be used for debugging
-  - should be able to be used for CI reporting
-
-- Run-time tests vs Compile-time tests
-  - the choice should belong to the user
-
 ### Features
 
 - Single header (https://raw.githubusercontent.com/boost-ext/ut2/main/ut2)
