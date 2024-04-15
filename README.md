@@ -26,7 +26,7 @@
   - should be able to be used for CI reporting
 
 - Run-time tests vs Compile-time tests
-  - choice should belong to the user
+  - the choice should belong to the user
 
 ### Features
 
