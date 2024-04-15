@@ -254,7 +254,7 @@ time clang++-17 -x c++ -std=c++20 ut2 -c                               # 0.049s
 
 ```cpp
 /**
- * Assert defintion
+ * Assert definition
  * @code
  * expect(42 == 42_i);
  * expect(42 == 42_i) << "log";
@@ -279,7 +279,7 @@ struct suite;
 
 ```cpp
 /**
- * Test defintion
+ * Test definition
  * @code
  * "foo"_test = []          { ... }; // compile-time and run-time
  * "foo"_test = [] mutable  { ... }; // run-time only
@@ -304,7 +304,7 @@ template<auto Expr> inline constexpr auto constant;
 
 ```cpp
 /**
- * Allows mutating object (by default lambdas are const)
+ * Allows mutating object (by default lambdas are immutable)
  * @code
  * "foo"_test = [] {
  *   int i = 0;
