@@ -165,7 +165,7 @@ int main() {
   "errors"_test = [] {
     expect(42_i == short(42)); // [ERROR] Comparision of different types is not allowed
     expect(42 == 42);          // [ERROR] Expression required: expect(42_i == 42)
-    expect(4.2 == 4.2_d);      // [ERROR] Epsilon is required: expect((4.2 == 4.2_d)(.1))
+    expect(4.2 == 4.2_d);      // [ERROR] Epsilon is required: expect((4.2 == 4.2_d)(.01))
   };
 }
 ```

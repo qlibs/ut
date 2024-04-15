@@ -287,7 +287,7 @@ template<class T> requires type_traits::is_floating_point_v<T> struct eq<T, T> {
   constexpr eq(const T& lhs, const T& rhs) : lhs{lhs}, rhs{rhs} { }
   constexpr friend auto operator<<(auto& os, const eq& expr) -> decltype(os) requires requires { os << expr.lhs; os << expr.lhs; } { return (os << expr.lhs << " == " << expr.rhs); }
   [[nodiscard]] constexpr explicit operator bool() const {
-    static_assert(!type_traits::is_floating_point_v<T>, "[ERROR] Epsilon is required: expect((4.2 == 4.2_d)(.1))");
+    static_assert(!type_traits::is_floating_point_v<T>, "[ERROR] Epsilon is required: expect((4.2 == 4.2_d)(.01))");
     return {};
   }
   [[nodiscard]] constexpr auto operator()(T epsilon) {
