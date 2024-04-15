@@ -22,6 +22,7 @@
 - Reflection integration (optional via https://github.com/boost-ext/reflect)
 - Compiles cleanly with ([`-fno-exceptions -fno-rtti -Wall -Wextra -Werror -pedantic -pedantic-errors`](https://godbolt.org/z/cbshMjocd))
 - Fast compilation times (see [compilation times](#comp))
+- Fast run-time execution (see [performance](#perf))
 - Verifies itself upon include (aka run all tests via static_asserts but it can be disabled - see [FAQ](#faq))
 
 > Based on the `constexpr` ability of given compiler/standard
@@ -261,6 +262,55 @@ time clang++-17 -x c++ -std=c++20 ut2 -c                               # 0.049s
 -------------------------------------------------------------------------
 [ut]  https://github.com/boost-ext/ut/releases/tag/v2.0.1
 [ut2] https://github.com/boost-ext/ut2/releases/tag/v2.0.0
+```
+
+<a name="perf"></a>
+### Performance
+
+> [benchmark (100 tests, 1000 asserts)] https://godbolt.org/z/ezj4ndn3e
+
+```cpp
+time ./benchmark # 0m0.002s (-O3)
+time ./benchmark # 0m0.013s (-g)
+```
+
+> [x86-64 assembly (-O3)] https://godbolt.org/z/qKs47PP9G
+
+```cpp
+int main() {
+  "sum"_test = [] {
+    expect(42_i == 42);
+  };
+}
+```
+
+```cpp
+main:
+  mov  rax, qword ptr [rip + cfg<ut::v2_0_0::override>+136]
+  inc  dword ptr [rax + 24]
+  mov  ecx, dword ptr [rax + 8]
+  mov  edx, dword ptr [rax + 92]
+  lea  esi, [rdx + 1]
+  mov  dword ptr [rax + 92], esi
+  mov  dword ptr [rax + 4*rdx + 28], ecx
+  mov  rax, qword ptr [rax]
+  lea  rcx, [rip + .L.str]
+  mov  qword ptr [rax + 8], rcx
+  mov  dword ptr [rax + 16], 6
+  lea  rcx, [rip + template parameter object for fixed_string
+  mov  qword ptr [rax + 24], rcx
+  inc  dword ptr [rip + ut::v2_0_0::cfg<ut::v2_0_0::override>+52]
+  mov  rax, qword ptr [rip + ut::v2_0_0::cfg<ut::v2_0_0::override>+136]
+  mov  ecx, dword ptr [rax + 8]
+  mov  edx, dword ptr [rax + 92]
+  dec  edx
+  mov  dword ptr [rax + 92], edx
+  xor  esi, esi
+  cmp  ecx, dword ptr [rax + 4*rdx + 28]
+  sete sil
+  inc  dword ptr [rax + 4*rsi + 16]
+  xor  eax, eax
+  ret
 ```
 
 ---
