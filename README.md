@@ -13,16 +13,16 @@
 
 ### Motivation
 
-Compile-time first unit-testing is a super power of modern C++.
-It catches errors easier and helps (to a certain degree) avoid memory leaks and undefined behaviors.
-However, the main problem facing compile-time tests are bad error messages.
-With C++20 and, especially, with clang that can be improved a lot to a degree sometimes even better than at run-time.
-Running tests at compile-time is useful and more and more powerful with each new standard, but there is also a strong use case for run-time execution as well.
-Firstly, not all tests can be executed at compile-time due to constexpr limitations (for example goto/exceptions/reinterpret_cast/... in C++20).
-Additionally there is case for the code coverage, debugging and CI reporting.
-Therefore, the combination of both seems the most powerful: compile-time tests with nicer error messages and run-time execution on top (with ability choose the execution model globally and/or for specific tests).
+> Compile-time first unit-testing is a super power of modern C++.
+> It catches errors easier and helps (to a certain degree) avoid memory leaks and undefined behaviors.
+> However, the main problem facing compile-time tests are bad error messages.
+> With C++20 and, especially, with clang that can be improved a lot to a degree sometimes even better than at run-time.
+> Running tests at compile-time is useful and more and more powerful with each new standard, but there is also a strong use case for run-time execution as well.
+> Firstly, not all tests can be executed at compile-time due to constexpr limitations (for example goto/exceptions/reinterpret_cast/... in C++20).
+> Additionally there is case for the code coverage, debugging and CI reporting.
+> Therefore, the combination of both seems the most powerful: compile-time tests with nicer error messages and run-time execution on top (with ability choose the execution model globally and/or for specific tests).
 
-https://github.com/boost-ext/ut2 is trying to accomplish just that.
+`ut2` is trying to accomplish just that.
 
 ### Features
 
