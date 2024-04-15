@@ -237,7 +237,7 @@ struct custom_config {
 template<class... Ts> auto ut::cfg<ut::override, Ts...> = custom_config{};
 
 int main() {
-  "config"_test = []() mutable {
+  "config"_test = [] mutable {
     expect(42 == 43_i); // no output
   };
 };
