@@ -76,7 +76,7 @@ int main() {
     expect(sum(1, 2, 3) == 6_i);                  // fails at run-time
   };
 
-  "sum [compile-time only]"_test = [] consteval { // conteval = compile-time only (C++23)
+  "sum [compile-time only]"_test = [] consteval { // consteval = compile-time only (C++23)
     expect(sum(1, 2, 3) == 6_i);                  // fails at compile-time
   };
 }
