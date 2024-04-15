@@ -256,8 +256,8 @@ echo $? # 139 # no output
 > [include] https://raw.githubusercontent.com/boost-ext/ut2/main/ut2
 
 ```cpp
-time g++-13.2 -x c++ -std=c++20 ut2 -c -DDISABLE_STATIC_ASSERT_TESTS   # 0.022s
-time g++-13.2 -x c++ -std=c++20 ut2 -c                                 # 0.042s
+time g++-13 -x c++ -std=c++20 ut2 -c -DDISABLE_STATIC_ASSERT_TESTS   # 0.022s
+time g++-13 -x c++ -std=c++20 ut2 -c                                 # 0.042s
 ```
 
 ```cpp
