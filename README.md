@@ -252,6 +252,14 @@ time clang++-17 -x c++ -std=c++20 ut2 -c -DDISABLE_STATIC_ASSERT_TESTS # 0.028s
 time clang++-17 -x c++ -std=c++20 ut2 -c                               # 0.049s
 ```
 
+> [benchmark (100 tests, 1000 asserts)] https://godbolt.org/z/ezj4ndn3e
+
+```cpp
+https://github.com/boost-ext/ut/releases/tag/v2.0.1:  time clang++-17 bench.cpp -std=c++20                               # 0m13.498s
+https://github.com/boost-ext/ut2/releases/tag/v2.0.0: time clang++-17 bench.cpp -std=c++20                               # 0m0.813s
+https://github.com/boost-ext/ut2/releases/tag/v2.0.0: time clang++-17 bench.cpp -std=c++20 -DDISABLE_STATIC_ASSERT_TESTS # 0m0.758s (+ mutable)
+```
+
 ---
 
 ### API
