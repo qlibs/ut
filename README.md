@@ -11,21 +11,15 @@
 
 > https://en.wikipedia.org/wiki/Unit_testing
 
-### Motivation
+### Motivation (Compile-time first unit-testing is a super power of modern C++)
 
-- Compile-time first unit-testing is a super power of modern C++
-  - It catches errors easier and helps (to a certain degree) avoid memory leaks and undefined behaviors
-
-- However, the main problem facing compile-time tests are bad error messages
-  - With C++20 and, especially, with clang that can be improved a lot to a degree sometimes even better than at run-time
-
-- Running tests at compile-time is useful and more and more powerful with each new standard, but there is also a strong use case for run-time execution as well.
-  - Firstly, not all tests can be executed at compile-time due to constexpr limitations (for example goto/exceptions/reinterpret_cast/... in C++20)
-  - Additionally there is case for the code coverage, debugging and CI reporting
-
-- Therefore, the combination of both seems the most powerful
-  - Compile-time tests with nicer error messages and run-time execution on top
-  - Plus ability to choose the execution model globally and/or for specific tests
+- Compile-time tests should catch errors ealier
+- Compile-time tests should help (to a certain degree) avoid memory leaks and undefined behaviors
+- Compile-time tests should have good error messages
+- Run-time tests can be used when compile-time tests can't (for example goto/exceptions/reinterpret_cast/... in C++20)
+- Run-time tests can be used for code coverage
+- Run-time tests can be used for easier debugging
+- Run-time tests can be used for CI reporting
 
 ### Features
 
@@ -131,7 +125,7 @@ $CXX example.cpp -std=c++20 -o example && ./example
 PASSED: tests: 2 (2 passed, 0 failed, 1 compile-time), asserts: 4 (4 passed, 0 failed)
 ```
 
-> Expectations (https://godbolt.org/z/57KxPsTsE)
+> Assertions (https://godbolt.org/z/57KxPsTsE)
 
 ```cpp
 int main() {
@@ -269,29 +263,71 @@ time clang++-17 -x c++ -std=c++20 ut2 -c                               # 0.049s
 ### API
 
 ```cpp
+/**
+ * Assertions
+ *
+ * @code
+ * expect(42 == 42_i);
+ * expect(42 == 42_i) << "log";
+ * expect[42 == 42_i]; // fatal assertion
+ * @endcode
+ */
 inline constexpr struct {
   constexpr auto operator()(auto expr);
-  constexpr auto operator[](auto expr); /// fatal
+  constexpr auto operator[](auto expr); // fatal
 } expect{};
 ```
 
 ```cpp
+/**
+ * Test suite
+ * @code
+ * suite test_suite = [] { ... };
+ * @encode
+ */
 struct suite;
 ```
 
 ```cpp
+/**
+ * Test
+ *
+ * @code
+ * "foo"_test = []          { ... }; // compile-time and run-time
+ * "foo"_test = [] mutable  { ... }; // run-time only
+ * "foo"_test = [] constval { ... }; // compile-time only
+ * @endcode
+ */
 template<fixed_string Str>
 [[nodiscard]] constexpr auto operator""_test();
 ```
 
 ```cpp
-template<auto Expr>
-inline constexpr auto constant;
+/**
+ * Compile time expression
+ *
+ * @code
+ * expect(constant<42_i == 42>); // forces compile-time evaluation
+ * @encode
+ */
+template<auto Expr> inline constexpr auto constant;
 ```
 
 ```cpp
-template<class T>
-[[nodiscard]] constexpr auto& mut(const T& t);
+/**
+ * Allows mutating object (by default lambdas are const)
+ *
+ * @code
+ * "foo"_test = [] {
+ *   int i = 0;
+ *   "sub"_test = [i] {
+ *     mut(i) = 42;
+ *   };
+ *   expect(i == 42_i);
+ * };
+ * @endcode
+ */
+template<class T> [[nodiscard]] constexpr auto& mut(const T&);
 ```
 
 ```cpp

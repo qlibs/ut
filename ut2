@@ -124,15 +124,15 @@ struct reporter {
     outputter.on(summary);
     __builtin_abort();
   }
-  constexpr ~reporter() {
 #if !defined(UT_COMPILE_TIME_ONLY)
+  constexpr ~reporter() {
     outputter.on(summary);
     if (!(summary.asserts[events::summary::PASSED] + summary.asserts[events::summary::FAILED]) ||
           summary.asserts[events::summary::FAILED]) {
       __builtin_abort();
     }
-#endif
   }
+#endif
 
   TOutputter& outputter;
   events::summary summary{};
