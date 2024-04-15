@@ -1,7 +1,7 @@
 <a href="http://www.boost.org/LICENSE_1_0.txt" target="_blank">![Boost Licence](http://img.shields.io/badge/license-boost-blue.svg)</a>
 <a href="https://github.com/boost-ext/ut2/releases" target="_blank">![Version](https://badge.fury.io/gh/boost-ext%2Fut2.svg)</a>
 <a href="https://godbolt.org/z/cbshMjocd">![build](https://img.shields.io/badge/build-blue.svg)</a>
-<a href="https://godbolt.org/z/9jbzh3h4W">![Try it online](https://img.shields.io/badge/try%20it-online-blue.svg)</a>
+<a href="https://godbolt.org/z/MhMxP31fc">![Try it online](https://img.shields.io/badge/try%20it-online-blue.svg)</a>
 
 ---------------------------------------
 
@@ -35,7 +35,7 @@
 
 ### Examples
 
-> Hello world (https://godbolt.org/z/9jbzh3h4W)
+> Hello world (https://godbolt.org/z/MhMxP31fc)
 
 ```cpp
 #include <ut2>
@@ -43,7 +43,11 @@
 constexpr auto sum(auto... args) { return (args + ...); }
 
 int main() {
+  using namespace ut;
+
   "sum"_test = [] {
+    expect(sum(1) == 1_i);
+    expect(sum(1, 2) == 3_i);
     expect(sum(1, 2, 3) == 6_i);
   };
 }
@@ -51,7 +55,7 @@ int main() {
 
 ```sh
 $CXX example.cpp -std=c++20 -o example && ./example
-PASSED: tests: 1 (1 passed, 0 failed, 1 compile-time), asserts: 1 (1 passed, 0 failed)
+PASSED: tests: 1 (1 passed, 0 failed, 1 compile-time), asserts: 3 (3 passed, 0 failed)
 ```
 
 > Execution model (https://godbolt.org/z/Gx31rMP56)
