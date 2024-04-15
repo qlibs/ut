@@ -271,8 +271,7 @@ time clang++-17 -x c++ -std=c++20 ut2 -c                               # 0.049s
 
 ```cpp
 /**
- * Assertions
- *
+ * Assert defintion
  * @code
  * expect(42 == 42_i);
  * expect(42 == 42_i) << "log";
@@ -287,7 +286,7 @@ inline constexpr struct {
 
 ```cpp
 /**
- * Test suite
+ * Test suite definition
  * @code
  * suite test_suite = [] { ... };
  * @encode
@@ -297,8 +296,7 @@ struct suite;
 
 ```cpp
 /**
- * Test
- *
+ * Test defintion
  * @code
  * "foo"_test = []          { ... }; // compile-time and run-time
  * "foo"_test = [] mutable  { ... }; // run-time only
@@ -312,7 +310,6 @@ template<fixed_string Str>
 ```cpp
 /**
  * Compile time expression
- *
  * @code
  * expect(constant<42_i == 42>); // forces compile-time evaluation
  * @encode
@@ -323,7 +320,6 @@ template<auto Expr> inline constexpr auto constant;
 ```cpp
 /**
  * Allows mutating object (by default lambdas are const)
- *
  * @code
  * "foo"_test = [] {
  *   int i = 0;
@@ -501,7 +497,6 @@ struct runner {
 ```cpp
 /**
  * Customization point to override the default configuration
- *
  * @code
  * template<class... Ts> auto ut::cfg<ut::override, Ts...> = my_config{};
  * @endcode
