@@ -101,7 +101,7 @@ example.cpp:14:5:  note: in call to 'expect.operator()<ut::eq<int, int>>({6, 5})
 ```
 
 ```sh
-$CXX example.cpp -std=c++20 -o example && ./example
+$CXX example.cpp -std=c++20 -o example -DUT_RUNTIME_ONLY && ./example
 /app/example.cpp:14:FAILED:"sum [compile-time and run-time]": 6 == 5
 FAILED: tests: 3 (2 passed, 1 failed, 0 compile-time), asserts: 2 (1 passed, 1 failed)
 ```
