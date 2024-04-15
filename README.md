@@ -33,7 +33,9 @@
 
 ---
 
-### Hello world (https://godbolt.org/z/ree76dTdE)
+### Examples
+
+> Hello world (https://godbolt.org/z/9jbzh3h4W)
 
 ```cpp
 #include <ut2>
@@ -41,23 +43,140 @@
 constexpr auto sum(auto... args) { return (args + ...); }
 
 int main() {
-  using namespace ut;
-
   "sum"_test = [] {
-    expect(sum(0) == 0_i);
-    expect(sum(1, 2) == 3_i);
-    expect(sum(1, 2) > 0_i);
+    expect(sum(1, 2, 3) == 3_i);
   };
 }
 ```
 
 ```sh
-PASSED: tests: 1 (1 passed, 0 failed, 1 compile-time), asserts: 3 (3 passed, 0 failed)
+PASSED: tests: 1 (1 passed, 0 failed, 1 compile-time), asserts: 1 (1 passed, 0 failed)
+```
+
+> Execution model (https://godbolt.org/z/Gx31rMP56)
+
+```cpp
+static_assert(("compile time only"_test = [] {
+  expect(sum(1, 2, 3) == 6_i);
+}));
+
+int main() {
+  "sum [compile-time and run-time]"_test = [] {   // default: constexpr = compile-time and run-time
+    expect(sum(1, 2, 3) == 5_i);                  // fails at compile-time and/or run-ime
+                                                  // note: error: expect.operator()<ut::eq<int, int>>({6, 5})
+  };
+
+  "sum [run-time only]"_test = [] mutable {       // mutable = run-time only
+    expect(sum(1, 2, 3) == 6_i);                  // fails at run-time
+  };
+
+  "sum [compile-time only]"_test = [] consteval { // conteval = compile-time only (requires C++23)
+    expect(sum(1, 2, 3) == 6_i);                  // fails at compile-time
+  };
+}
+```
+
+```sh
+$CXX example.cpp -std=c++20 # -DUT_COMPILE_TIME_ONLY
+```
+
+```sh
+ut2:156:25: error: static_assert((test(), "[FAILED]"));
+example.cpp:13:44: note:"sum [compile-time and run-time]"_test
+example.cpp:14:5:  note: in call to 'expect.operator()<ut::eq<int, int>>({6, 5})
+  expect(sum(1, 2, 3) == 5_i);
+```
+
+```sh
+$CXX example.cpp -DUT_RUN_TIME_ONLY
+```
+
+```sh
+/app/example.cpp:14:FAILED:"sum [compile-time and run-time]": 6 == 5
+FAILED: tests: 3 (2 passed, 1 failed, 0 compile-time), asserts: 2 (1 passed, 1 failed)
+```
+
+> Suites/Sub-tests (https://godbolt.org/z/a9nceoPKn)
+
+```cpp
+ut::suite test_suite = [] {
+  "vector [sub-tests]"_test = [] {
+    std::vector<int> v(5);
+    expect(v.size() == 5_ul);
+    expect(v.capacity() >= 5_ul);
+
+    "resizing bigger changes size and capacity"_test = [=] {
+      mut(v).resize(10);
+      expect(v.size() == 10_ul);
+      expect(v.capacity() >= 10_ul);
+    };
+  };
+};
+
+int main() { }
+```
+
+```sh
+PASSED: tests: 2 (2 passed, 0 failed, 1 compile-time), asserts: 4 (4 passed, 0 failed)
+```
+
+> Expectations (https://godbolt.org/z/57KxPsTsE)
+
+```cpp
+int main() {
+  "expect"_test = [] {
+    "different ways"_test = [] {
+      expect(42 == 42_i);
+      expect(eq(42, 42)) << "same as expect(42 == 42_i)";
+      expect(_i(42) == 42) << "same as expect(42_i == 42)";
+    };
+
+    "floating point"_test = [] {
+      expect((4.2 == 4.2_d)(.01)) << "floating point comparison with .01 epsilon precision";
+    };
+
+    "fatal"_test = [] mutable { // at run-time
+      std::vector<int> v{1};
+      expect[v.size() > 1_ul] << "fatal, stops running tests further";
+      expect(v[1] == 42_i); // not executed
+    };
+
+    "compile-time expression"_test = [] {
+      expect(constant<42 == 42_i>) << "requires compile-time expression";
+    };
+  };
+}
+```
+
+```sh
+example.cpp:21:FAILED:"fatal": 1 > 1
+FAILED: tests: 3 (2 passed, 1 failed, 3 compile-time), asserts: 5 (4 passed, 1 failed)
+```
+
+> Errors/Checks (https://godbolt.org/z/n48qPs8K9)
+
+```cpp
+int main() {
+  "leak"_test = [] {
+    new int; // compile-time error
+  };
+
+  "ub"_test = [] {
+     int* i{};
+     *i = 42; // compile-time error
+  };
+
+  "errors"_test = [] {
+     expect(42_i == short(42)); // [ERROR] Comparision of different types is not allowed
+     expect(42 == 42);          // [ERROR] Expression required: expect(42_i == 42)
+     expect(4.2 == 4.2_d);      // [ERROR] Epsilon is required: expect((4.2 == 4.2_d)(.1))
+  };
+}
 ```
 
 ---
 
-### Examples
+### More examples
 
 - [feature] Reflection integration - https://godbolt.org/z/5T51odcfP
 - [feature] Custom configuration   - https://godbolt.org/z/oqfjesT6E
