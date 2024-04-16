@@ -62,24 +62,24 @@ PASSED: tests: 1 (1 passed, 0 failed, 1 compile-time), asserts: 3 (3 passed, 0 f
 > Execution model (https://godbolt.org/z/oe3E6azMh)
 
 ```cpp
-static_assert(("compile time only"_test = [] {
+static_assert(("sum"_test = [] { // compile-time only
   expect(sum(1, 2, 3) == 6_i);
 }));
 
 int main() {
-  "sum [compile-time and run-time]"_test = [] {
-    expect(sum(1, 2, 3) == 5_i); // error: expect.operator()<ut::eq<int, int>>({6, 5})
-  };
-
-  "sum [compile-time and run-time]"_test = [] constexpr {
+  "sum"_test = [] {              // compile time and run-time
     expect(sum(1, 2, 3) == 5_i);
   };
 
-  "sum [run-time only]"_test = [] mutable {
+  "sum"_test = [] constexpr {    // compile-time and run-time
     expect(sum(1, 2, 3) == 6_i);
   };
 
-  "sum [compile-time only]"_test = [] consteval { // requires C++23
+  "sum"_test = [] mutable {      // run-time only
+    expect(sum(1, 2, 3) == 6_i);
+  };
+
+  "sum"_test = [] consteval {    // compile-time only
     expect(sum(1, 2, 3) == 6_i);
   };
 }
@@ -88,13 +88,13 @@ int main() {
 ```sh
 $CXX example.cpp -std=c++20 # -DUT_COMPILE_TIME_ONLY
 ut2:156:25: error: static_assert((test(), "[FAILED]"));
-example.cpp:13:44: note:"sum [compile-time and run-time]"_test
+example.cpp:13:44: note:"sum"_test
 example.cpp:14:5:  note: in call to 'expect.operator()<ut::eq<int, int>>({6, 5})'
 ```
 
 ```sh
 $CXX example.cpp -std=c++20 -o example -DUT_RUNTIME_ONLY && ./example
-example.cpp:14:FAILED:"sum [compile-time and run-time]": 6 == 5
+example.cpp:14:FAILED:"sum": 6 == 5
 FAILED: tests: 3 (2 passed, 1 failed, 0 compile-time), asserts: 2 (1 passed, 1 failed)
 ```
 
