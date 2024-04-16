@@ -59,7 +59,7 @@ $CXX example.cpp -std=c++20 -o example && ./example
 PASSED: tests: 1 (1 passed, 0 failed, 1 compile-time), asserts: 3 (3 passed, 0 failed)
 ```
 
-> Execution model (https://godbolt.org/z/Gx31rMP56)
+> Execution model (https://godbolt.org/z/oe3E6azMh)
 
 ```cpp
 static_assert(("compile time only"_test = [] {
@@ -67,17 +67,20 @@ static_assert(("compile time only"_test = [] {
 }));
 
 int main() {
-  "sum [compile-time and run-time]"_test = [] {   // default: compile-time and run-time
-    expect(sum(1, 2, 3) == 5_i);                  // fails at compile-time and/or run-ime
-    // error: expect.operator()<ut::eq<int, int>>({6, 5})
+  "sum [compile-time and run-time]"_test = [] {
+    expect(sum(1, 2, 3) == 5_i); // error: expect.operator()<ut::eq<int, int>>({6, 5})
   };
 
-  "sum [run-time only]"_test = [] mutable {       // mutable = run-time only
-    expect(sum(1, 2, 3) == 6_i);                  // fails at run-time
+  "sum [compile-time and run-time]"_test = [] constexpr {
+    expect(sum(1, 2, 3) == 5_i);
   };
 
-  "sum [compile-time only]"_test = [] consteval { // consteval = compile-time only (C++23)
-    expect(sum(1, 2, 3) == 6_i);                  // fails at compile-time
+  "sum [run-time only]"_test = [] mutable {
+    expect(sum(1, 2, 3) == 6_i);
+  };
+
+  "sum [compile-time only]"_test = [] consteval { // requires C++23
+    expect(sum(1, 2, 3) == 6_i);
   };
 }
 ```
