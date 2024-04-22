@@ -8,11 +8,19 @@
 #ifndef UT2
 #define UT2 2'0'0
 
-#if __has_include(<iostream>)
+#if !defined(UT2_HAS_IOSTREAM)
+#define UT2_HAS_IOSTREAM __has_include(<iostream>)
+#endif
+
+#if (UT2_HAS_IOSTREAM)
 #include <iostream> // [optional] std::clog
 #endif
 
-#if __has_include(<cstdint>)
+#if !defined(UT2_HAS_CSTDINT)
+#define UT2_HAS_CSTDINT __has_include(<cstdint>)
+#endif
+
+#if (UT2_HAS_CSTDINT)
 #include <cstdint> // [optional] std::int8_t, std::int16_t, std::int32_t, std::int64_t, std::uint8_t, std::uint32_t, std::uint64_t
 #endif
 
@@ -36,7 +44,7 @@ template<unsigned Size> struct fixed_string {
   [[nodiscard]] constexpr auto operator[](const auto i) const { return storage[i]; }
   [[nodiscard]] constexpr auto data() const { return storage; }
   [[nodiscard]] static constexpr auto size() { return Size; }
-  constexpr friend auto operator<<(auto& os, const fixed_string& fs) -> decltype(os) { return os << fs.storage; }
+  constexpr friend auto operator<<(auto& os, fixed_string&& fs) -> decltype(os) { return os << fs.storage; }
   char storage[Size]{};
 };
 } // utility
@@ -174,7 +182,7 @@ struct runner {
 };
 
 struct default_cfg {
-#if __has_include(<iostream>)
+#if (UT2_HAS_IOSTREAM)
   ut::outputter<decltype(std::clog)> outputter{std::clog};
 #else
   struct { template<class T> constexpr auto& operator<<(const T&) const { return *this; } } null_stream{};
@@ -279,13 +287,13 @@ template<class TLhs, class TRhs> struct eq {
 };
 template<class T> struct eq<T, T> {
   constexpr eq(const T& lhs, const T& rhs) : lhs{lhs}, rhs{rhs}, result{lhs == rhs} { }
-  constexpr friend auto operator<<(auto& os, const eq& expr) -> decltype(os) requires requires { os << expr.lhs; os << expr.lhs; } { return (os << expr.lhs << " == " << expr.rhs); }
+  constexpr friend auto operator<<(auto& os, eq&& expr) -> decltype(os) requires requires { os << expr.lhs; os << expr.lhs; } { return (os << expr.lhs << " == " << expr.rhs); }
   [[nodiscard]] constexpr explicit operator bool() const { return result; }
   T lhs; T rhs; bool result{};
 };
 template<class T> requires type_traits::is_floating_point_v<T> struct eq<T, T> {
   constexpr eq(const T& lhs, const T& rhs) : lhs{lhs}, rhs{rhs} { }
-  constexpr friend auto operator<<(auto& os, const eq& expr) -> decltype(os) requires requires { os << expr.lhs; os << expr.lhs; } { return (os << expr.lhs << " == " << expr.rhs); }
+  constexpr friend auto operator<<(auto& os, eq&& expr) -> decltype(os) requires requires { os << expr.lhs; os << expr.lhs; } { return (os << expr.lhs << " == " << expr.rhs); }
   [[nodiscard]] constexpr explicit operator bool() const {
     static_assert(!type_traits::is_floating_point_v<T>, "[ERROR] Epsilon is required: expect((4.2 == 4.2_d)(.01))");
     return {};
@@ -310,7 +318,7 @@ struct eq<TLhs, TRhs> {
       return true;
     }(lhs, rhs)
   } { }
-  constexpr friend auto operator<<(auto& os, const eq& expr) -> decltype(os) requires requires { os << expr.lhs; os << expr.lhs; } { return (os << expr.lhs << " == " << expr.rhs); }
+  constexpr friend auto operator<<(auto& os, eq&& expr) -> decltype(os) requires requires { os << expr.lhs; os << expr.lhs; } { return (os << expr.lhs << " == " << expr.rhs); }
   [[nodiscard]] constexpr explicit operator bool() const { return result; }
   TLhs lhs; TRhs rhs; bool result{};
 };
@@ -322,13 +330,13 @@ template<class TLhs, class TRhs> struct neq {
 };
 template<class T> struct neq<T, T> {
   constexpr neq(const T& lhs, const T& rhs) : lhs{lhs}, rhs{rhs}, result{lhs != rhs} { }
-  constexpr friend auto operator<<(auto& os, const neq& expr) -> decltype(os) requires requires { os << expr.lhs; os << expr.lhs; } { return (os << expr.lhs << " != " << expr.rhs); }
+  constexpr friend auto operator<<(auto& os, neq&& expr) -> decltype(os) requires requires { os << expr.lhs; os << expr.lhs; } { return (os << expr.lhs << " != " << expr.rhs); }
   [[nodiscard]] constexpr explicit operator bool() const { return result; }
   T lhs; T rhs; bool result{};
 };
 template<class T> requires type_traits::is_floating_point_v<T> struct neq<T, T> {
   constexpr neq(const T& lhs, const T& rhs) : lhs{lhs}, rhs{rhs} { }
-  constexpr friend auto operator<<(auto& os, const neq& expr) -> decltype(os) requires requires { os << expr.lhs; os << expr.lhs; } { return (os << expr.lhs << " == " << expr.rhs); }
+  constexpr friend auto operator<<(auto& os, neq&& expr) -> decltype(os) requires requires { os << expr.lhs; os << expr.lhs; } { return (os << expr.lhs << " == " << expr.rhs); }
   [[nodiscard]] constexpr explicit operator bool() const {
     static_assert(!type_traits::is_floating_point_v<T>, "[ERROR] Epsilon is required: expect((4.2 == 4.2_d)(.1))");
     return {};
@@ -350,7 +358,7 @@ template<class TLhs, class TRhs> struct gt {
 };
 template<class T> struct gt<T, T> {
   constexpr gt(const T& lhs, const T& rhs) : lhs{lhs}, rhs{rhs}, result{lhs > rhs} { }
-  constexpr friend auto operator<<(auto& os, const gt& expr) -> decltype(os) requires requires { os << expr.lhs; os << expr.lhs; } { return (os << expr.lhs << " > " << expr.rhs); }
+  constexpr friend auto operator<<(auto& os, gt&& expr) -> decltype(os) requires requires { os << expr.lhs; os << expr.lhs; } { return (os << expr.lhs << " > " << expr.rhs); }
   [[nodiscard]] constexpr explicit operator bool() const { return result; }
   T lhs; T rhs; bool result{};
 };
@@ -362,7 +370,7 @@ template<class TLhs, class TRhs> struct ge {
 };
 template<class T> struct ge<T, T> {
   constexpr ge(const T& lhs, const T& rhs) : lhs{lhs}, rhs{rhs}, result{lhs >= rhs} { }
-  constexpr friend auto operator<<(auto& os, const ge& expr) -> decltype(os) requires requires { os << expr.lhs; os << expr.lhs; } { return (os << expr.lhs << " >= " << expr.rhs); }
+  constexpr friend auto operator<<(auto& os, ge&& expr) -> decltype(os) requires requires { os << expr.lhs; os << expr.lhs; } { return (os << expr.lhs << " >= " << expr.rhs); }
   [[nodiscard]] constexpr explicit operator bool() const { return result; }
   T lhs; T rhs; bool result{};
 };
@@ -374,7 +382,7 @@ template<class TLhs, class TRhs> struct lt {
 };
 template<class T> struct lt<T, T> {
   constexpr lt(const T& lhs, const T& rhs) : lhs{lhs}, rhs{rhs}, result{lhs < rhs} { }
-  constexpr friend auto operator<<(auto& os, const lt& expr) -> decltype(os) requires requires { os << expr.lhs; os << expr.lhs; } { return (os << expr.lhs << " < " << expr.rhs); }
+  constexpr friend auto operator<<(auto& os, lt&& expr) -> decltype(os) requires requires { os << expr.lhs; os << expr.lhs; } { return (os << expr.lhs << " < " << expr.rhs); }
   [[nodiscard]] constexpr explicit operator bool() const { return result; }
   T lhs; T rhs; bool result{};
 };
@@ -386,14 +394,14 @@ template<class TLhs, class TRhs> struct le {
 };
 template<class T> struct le<T, T> {
   constexpr le(const T& lhs, const T& rhs) : lhs{lhs}, rhs{rhs}, result{lhs <= rhs} { }
-  constexpr friend auto operator<<(auto& os, const le& expr) -> decltype(os) requires requires { os << expr.lhs; os << expr.lhs; } { return (os << expr.lhs << " <= " << expr.rhs); }
+  constexpr friend auto operator<<(auto& os, le&& expr) -> decltype(os) requires requires { os << expr.lhs; os << expr.lhs; } { return (os << expr.lhs << " <= " << expr.rhs); }
   [[nodiscard]] constexpr explicit operator bool() const { return result; }
   T lhs; T rhs; bool result{};
 };
 
 template<class T> struct nt {
   constexpr nt(const T& t) : t{t}, result{!t} { }
-  constexpr friend auto operator<<(auto& os, const nt& expr) -> decltype(os) requires requires { os << expr.t; } { return (os << "!" << expr.t); }
+  constexpr friend auto operator<<(auto& os, nt&& expr) -> decltype(os) requires requires { os << expr.t; } { return (os << "!" << expr.t); }
   [[nodiscard]] constexpr explicit operator bool() const { return result; }
   T t; bool result{};
 };
@@ -443,7 +451,7 @@ struct _ull { unsigned long long VALUE{}; };
 struct _f { float VALUE{}; constexpr auto operator-() const { return _f(-VALUE); } };
 struct _d { double VALUE{}; constexpr auto operator-() const { return _d(-VALUE); } };
 struct _ld { long double VALUE{}; constexpr auto operator-() const { return _ld(-VALUE); } };
-#if __has_include(<cstdint>)
+#if (UT2_HAS_CSTDINT)
 struct _i8 { std::int8_t VALUE{}; constexpr auto operator-() const { return _i8(-VALUE); } };
 struct _i16 { std::int16_t VALUE{}; constexpr auto operator-() const { return _i16(-VALUE); } };
 struct _i32 { std::int32_t VALUE{}; constexpr auto operator-() const { return _i32(-VALUE); } };
@@ -457,7 +465,7 @@ struct _string {
   struct view {
     [[nodiscard]] constexpr auto operator[](auto i) const { return data_[i]; }
     [[nodiscard]] constexpr auto size() const { return size_; }
-    constexpr friend auto operator<<(auto& os, const view& v) -> decltype(os) { return (os << v.data_); }
+    constexpr friend auto operator<<(auto& os, view&& v) -> decltype(os) { return (os << v.data_); }
     [[nodiscard]] constexpr auto operator==(const view& other) const -> bool {
       if (size() != other.size()) { return false; }
       for (decltype(size()) i{}; i < size(); ++i) { if ((*this)[i] != other[i]) { return false; } }
@@ -481,7 +489,7 @@ struct _string {
 [[nodiscard]] constexpr auto operator""_f(long double value) { return _f(value); }
 [[nodiscard]] constexpr auto operator""_d(long double value) { return _d(value); }
 [[nodiscard]] constexpr auto operator""_ld(long double value) { return _ld(value); }
-#if __has_include(<cstdint>)
+#if (UT2_HAS_CSTDINT)
 [[nodiscard]] constexpr auto operator""_i8(unsigned long long int value) { return _i8(value); }
 [[nodiscard]] constexpr auto operator""_i16(unsigned long long int value) { return _i16(value); }
 [[nodiscard]] constexpr auto operator""_i32(unsigned long long int value) { return _i32(value); }
@@ -662,7 +670,7 @@ static_assert(([] {
     static_assert(-_d{4.2}.VALUE < double(0));
     static_assert(-_ld{4.2}.VALUE < ld(0));
 
-    #if __has_include(<cstdint>)
+    #if (UT2_HAS_CSTDINT)
       static_assert(std::int8_t(-42) == -_i8{42}.VALUE);
       static_assert(std::int16_t(-42) == -_i16{42}.VALUE);
       static_assert(std::int32_t(-42) == -_i32{42}.VALUE);
@@ -702,7 +710,7 @@ static_assert(([] {
     static_assert(!(.13f == .12_f)(.001));
     static_assert((-9.12345678 == -9.12345678_d)(.00001));
 
-    #if __has_include(<cstdint>)
+    #if (UT2_HAS_CSTDINT)
       static_assert(std::int8_t(-42) == -42_i8);
       static_assert(std::int16_t(-42) == -42_i16);
       static_assert(std::int32_t(-42) == -42_i32);

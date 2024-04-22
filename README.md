@@ -556,6 +556,8 @@ template <class...> inline auto cfg = default_cfg{};
 
 ```cpp
 #define UT2 2'0'0                   // Current library version (SemVer)
+#define UT2_HAS_IOSTREAM            // [default] __has_include(<iostream>)
+#define UT2_HAS_CSTDINT             // [default] __has_include(<cstdint>)
 #define UT_RUN_TIME_ONLY            // If defined tests will be executed
                                     // at run-time + static_assert tests
 #define UT_COMPILE_TIME_ONLY        // If defined only compile-time tests
