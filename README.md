@@ -98,6 +98,29 @@ example.cpp:14:FAILED:"sum": 6 == 5
 FAILED: tests: 3 (2 passed, 1 failed, 0 compile-time), asserts: 2 (1 passed, 1 failed)
 ```
 
+> Constant evaluation (https://godbolt.org/z/K3szf317T)
+
+```cpp
+constexpr auto test() {
+  if consteval { return 42; } else { return 87; }
+}
+
+int main() {
+  "compile-time"_test = [] consteval {
+    expect(42_i == test());
+  };
+
+  "run-time"_test = [] mutable {
+    expect(87_i == foo());
+  };
+}
+```
+
+```sh
+$CXX example.cpp -std=c++20 -o example && ./example
+PASSED: tests: 2 (2 passed, 0 failed, 1 compile-time), asserts: 1 (1 passed, 0 failed)
+```
+
 > Suites/Sub-tests (https://godbolt.org/z/a9nceoPKn)
 
 ```cpp
