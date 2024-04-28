@@ -111,7 +111,7 @@ int main() {
   };
 
   "run-time"_test = [] mutable {
-    expect(87_i == foo());
+    expect(87_i == test());
   };
 }
 ```
