@@ -6,7 +6,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 #ifndef UT2
-#define UT2 2'0'0
+#define UT2 2'0'0 // SemVer
 
 #if !defined(UT2_HAS_IOSTREAM)
 #define UT2_HAS_IOSTREAM __has_include(<iostream>)
