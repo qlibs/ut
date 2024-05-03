@@ -280,13 +280,13 @@ template<class TLhs, class TRhs> struct eq {
 };
 template<class T> struct eq<T, T> {
   constexpr eq(const T& lhs, const T& rhs) : lhs{lhs}, rhs{rhs}, result{lhs == rhs} { }
-  constexpr friend auto operator<<(auto& os, const eq& expr) -> decltype(auto) requires requires { os << expr.lhs; os << expr.lhs; } { return (os << expr.lhs << " == " << expr.rhs); }
+  constexpr friend auto operator<<(auto& os, const eq& expr) -> decltype(auto) requires requires { os << expr.lhs; os << expr.rhs; } { return (os << expr.lhs << " == " << expr.rhs); }
   [[nodiscard]] constexpr explicit operator bool() const { return result; }
   T lhs; T rhs; bool result{};
 };
 template<class T> requires type_traits::is_floating_point_v<T> struct eq<T, T> {
   constexpr eq(const T& lhs, const T& rhs) : lhs{lhs}, rhs{rhs} { }
-  constexpr friend auto operator<<(auto& os, const eq& expr) -> decltype(auto) requires requires { os << expr.lhs; os << expr.lhs; } { return (os << expr.lhs << " == " << expr.rhs); }
+  constexpr friend auto operator<<(auto& os, const eq& expr) -> decltype(auto) requires requires { os << expr.lhs; os << expr.rhs; } { return (os << expr.lhs << " == " << expr.rhs); }
   [[nodiscard]] constexpr explicit operator bool() const {
     static_assert(!type_traits::is_floating_point_v<T>, "[ERROR] Epsilon is required: expect((4.2 == 4.2_d)(.01))");
     return {};
@@ -311,7 +311,7 @@ struct eq<TLhs, TRhs> {
       return true;
     }(lhs, rhs)
   } { }
-  constexpr friend auto operator<<(auto& os, const eq& expr) -> decltype(auto) requires requires { os << expr.lhs; os << expr.lhs; } { return (os << expr.lhs << " == " << expr.rhs); }
+  constexpr friend auto operator<<(auto& os, const eq& expr) -> decltype(auto) requires requires { os << expr.lhs; os << expr.rhs; } { return (os << expr.lhs << " == " << expr.rhs); }
   [[nodiscard]] constexpr explicit operator bool() const { return result; }
   TLhs lhs; TRhs rhs; bool result{};
 };
@@ -324,13 +324,13 @@ template<class TLhs, class TRhs> struct neq {
 };
 template<class T> struct neq<T, T> {
   constexpr neq(const T& lhs, const T& rhs) : lhs{lhs}, rhs{rhs}, result{lhs != rhs} { }
-  constexpr friend auto operator<<(auto& os, const neq& expr) -> decltype(auto) requires requires { os << expr.lhs; os << expr.lhs; } { return (os << expr.lhs << " != " << expr.rhs); }
+  constexpr friend auto operator<<(auto& os, const neq& expr) -> decltype(auto) requires requires { os << expr.lhs; os << expr.rhs; } { return (os << expr.lhs << " != " << expr.rhs); }
   [[nodiscard]] constexpr explicit operator bool() const { return result; }
   T lhs; T rhs; bool result{};
 };
 template<class T> requires type_traits::is_floating_point_v<T> struct neq<T, T> {
   constexpr neq(const T& lhs, const T& rhs) : lhs{lhs}, rhs{rhs} { }
-  constexpr friend auto operator<<(auto& os, const neq& expr) -> decltype(auto) requires requires { os << expr.lhs; os << expr.lhs; } { return (os << expr.lhs << " == " << expr.rhs); }
+  constexpr friend auto operator<<(auto& os, const neq& expr) -> decltype(auto) requires requires { os << expr.lhs; os << expr.rhs; } { return (os << expr.lhs << " == " << expr.rhs); }
   [[nodiscard]] constexpr explicit operator bool() const {
     static_assert(!type_traits::is_floating_point_v<T>, "[ERROR] Epsilon is required: expect((4.2 == 4.2_d)(.1))");
     return {};
@@ -353,7 +353,7 @@ template<class TLhs, class TRhs> struct gt {
 };
 template<class T> struct gt<T, T> {
   constexpr gt(const T& lhs, const T& rhs) : lhs{lhs}, rhs{rhs}, result{lhs > rhs} { }
-  constexpr friend auto operator<<(auto& os, const gt& expr) -> decltype(auto) requires requires { os << expr.lhs; os << expr.lhs; } { return (os << expr.lhs << " > " << expr.rhs); }
+  constexpr friend auto operator<<(auto& os, const gt& expr) -> decltype(auto) requires requires { os << expr.lhs; os << expr.rhs; } { return (os << expr.lhs << " > " << expr.rhs); }
   [[nodiscard]] constexpr explicit operator bool() const { return result; }
   T lhs; T rhs; bool result{};
 };
@@ -366,7 +366,7 @@ template<class TLhs, class TRhs> struct ge {
 };
 template<class T> struct ge<T, T> {
   constexpr ge(const T& lhs, const T& rhs) : lhs{lhs}, rhs{rhs}, result{lhs >= rhs} { }
-  constexpr friend auto operator<<(auto& os, const ge& expr) -> decltype(auto) requires requires { os << expr.lhs; os << expr.lhs; } { return (os << expr.lhs << " >= " << expr.rhs); }
+  constexpr friend auto operator<<(auto& os, const ge& expr) -> decltype(auto) requires requires { os << expr.lhs; os << expr.rhs; } { return (os << expr.lhs << " >= " << expr.rhs); }
   [[nodiscard]] constexpr explicit operator bool() const { return result; }
   T lhs; T rhs; bool result{};
 };
@@ -379,7 +379,7 @@ template<class TLhs, class TRhs> struct lt {
 };
 template<class T> struct lt<T, T> {
   constexpr lt(const T& lhs, const T& rhs) : lhs{lhs}, rhs{rhs}, result{lhs < rhs} { }
-  constexpr friend auto operator<<(auto& os, const lt& expr) -> decltype(auto) requires requires { os << expr.lhs; os << expr.lhs; } { return (os << expr.lhs << " < " << expr.rhs); }
+  constexpr friend auto operator<<(auto& os, const lt& expr) -> decltype(auto) requires requires { os << expr.lhs; os << expr.rhs; } { return (os << expr.lhs << " < " << expr.rhs); }
   [[nodiscard]] constexpr explicit operator bool() const { return result; }
   T lhs; T rhs; bool result{};
 };
@@ -392,7 +392,7 @@ template<class TLhs, class TRhs> struct le {
 };
 template<class T> struct le<T, T> {
   constexpr le(const T& lhs, const T& rhs) : lhs{lhs}, rhs{rhs}, result{lhs <= rhs} { }
-  constexpr friend auto operator<<(auto& os, const le& expr) -> decltype(auto) requires requires { os << expr.lhs; os << expr.lhs; } { return (os << expr.lhs << " <= " << expr.rhs); }
+  constexpr friend auto operator<<(auto& os, const le& expr) -> decltype(auto) requires requires { os << expr.lhs; os << expr.rhs; } { return (os << expr.lhs << " <= " << expr.rhs); }
   [[nodiscard]] constexpr explicit operator bool() const { return result; }
   T lhs; T rhs; bool result{};
 };
