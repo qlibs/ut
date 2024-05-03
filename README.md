@@ -30,7 +30,6 @@
 ### Requirements
 
 - C++20 ([gcc-12+, clang-16+](https://godbolt.org/z/cbshMjocd))
-    - No STL required (optionally - iostream and cstdint)
 
 ---
 
@@ -39,6 +38,7 @@
 > Hello world (https://godbolt.org/z/MhMxP31fc)
 
 ```cpp
+#include <iostream> // output at run-time
 #include <ut2>
 
 constexpr auto sum(auto... args) { return (args + ...); }
@@ -579,8 +579,6 @@ template <class...> inline auto cfg = default_cfg{};
 
 ```cpp
 #define UT2 2'0'0                   // Current library version (SemVer)
-#define UT2_HAS_IOSTREAM            // [default] __has_include(<iostream>)
-#define UT2_HAS_CSTDINT             // [default] __has_include(<cstdint>)
 #define UT_RUN_TIME_ONLY            // If defined tests will be executed
                                     // at run-time + static_assert tests
 #define UT_COMPILE_TIME_ONLY        // If defined only compile-time tests
@@ -624,7 +622,3 @@ template <class...> inline auto cfg = default_cfg{};
 
 - Similar projects?
     > [ut](https://github.com/boost-ext/ut), [catch2](https://github.com/catchorg/Catch2), [googletest](https://github.com/google/googletest), [gunit](https://github.com/cpp-testing/GUnit), [boost.test](https://www.boost.org/doc/libs/latest/libs/test/doc/html/index.html)
-
----
-
-**Disclaimer** `ut2` is not an official Boost library.

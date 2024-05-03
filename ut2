@@ -8,21 +8,11 @@
 #ifndef UT2
 #define UT2 2'0'0 // SemVer
 
-#if !defined(UT2_HAS_IOSTREAM)
-#define UT2_HAS_IOSTREAM __has_include(<iostream>)
-#endif
-
-#if (UT2_HAS_IOSTREAM)
-#include <iostream> // [optional] std::clog
-#endif
-
-#if !defined(UT2_HAS_CSTDINT)
-#define UT2_HAS_CSTDINT __has_include(<cstdint>)
-#endif
-
-#if (UT2_HAS_CSTDINT)
-#include <cstdint> // [optional] std::int8_t, std::int16_t, std::int32_t, std::int64_t, std::uint8_t, std::uint32_t, std::uint64_t
-#endif
+namespace std { // iosfwd
+template<class> struct char_traits;
+template<class, class> class basic_ostream;
+extern basic_ostream<char, char_traits<char>> clog; // only used if defined
+} // namespace std
 
 namespace ut::inline v2_0_0 {
 namespace type_traits {
@@ -44,7 +34,7 @@ template<unsigned Size> struct fixed_string {
   [[nodiscard]] constexpr auto operator[](const auto i) const { return storage[i]; }
   [[nodiscard]] constexpr auto data() const { return storage; }
   [[nodiscard]] static constexpr auto size() { return Size; }
-  constexpr friend auto operator<<(auto& os, fixed_string&& fs) -> decltype(os) { return os << fs.storage; }
+  constexpr friend auto operator<<(auto& os, const fixed_string& fs) -> decltype(auto) { return os << fs.storage; }
   char storage[Size]{};
 };
 } // utility
@@ -81,9 +71,7 @@ class outputter {
   }
   constexpr auto on(const events::summary& event) {
     if (!__builtin_is_constant_evaluated()) {
-      if (!(event.asserts[events::summary::PASSED] + event.asserts[events::summary::FAILED])) {
-          os << "FAILED: ";
-      } else if (event.asserts[events::summary::FAILED] || event.tests[events::summary::FAILED]) {
+      if (event.asserts[events::summary::FAILED] || event.tests[events::summary::FAILED]) {
           os << "\nFAILED: ";
       } else {
           os << "PASSED: ";
@@ -137,8 +125,7 @@ struct reporter {
 #if !defined(UT_COMPILE_TIME_ONLY)
   constexpr ~reporter() {
     outputter.on(summary);
-    if (!(summary.asserts[events::summary::PASSED] + summary.asserts[events::summary::FAILED]) ||
-          summary.asserts[events::summary::FAILED]) {
+    if (summary.asserts[events::summary::FAILED]) {
       __builtin_abort();
     }
   }
@@ -182,12 +169,16 @@ struct runner {
 };
 
 struct default_cfg {
-#if (UT2_HAS_IOSTREAM)
-  ut::outputter<decltype(std::clog)> outputter{std::clog};
-#else
-  struct { template<class T> constexpr auto& operator<<(const T&) const { return *this; } } null_stream{};
-  ut::outputter<decltype(null_stream)> outputter{null_stream};
-#endif
+  struct {
+    constexpr decltype(auto) operator<<(const auto& t) {
+      if constexpr (requires { std::clog << t; }) {
+        return (std::clog << t);
+      } else {
+        return *this;
+      }
+    }
+  } stream;
+  ut::outputter<decltype(stream)> outputter{stream};
   ut::reporter<decltype(outputter)> reporter{outputter};
   ut::runner<decltype(reporter)> runner{reporter};
 };
@@ -249,7 +240,7 @@ inline constexpr struct {
 
 private:
   struct log {
-    template<class TMsg> constexpr const auto& operator<<(TMsg&& msg) const {
+    template<class TMsg> constexpr const auto& operator<<(const TMsg& msg) const {
       detail::cfg(msg).outputter.on(events::log<TMsg>{msg, result});
       return *this;
     }
@@ -281,19 +272,20 @@ template<auto Expr> inline constexpr auto constant = Expr;
 template<class T> [[nodiscard]] constexpr auto& mut(const T& t) { return const_cast<T&>(t); }
 
 template<class TLhs, class TRhs> struct eq {
-  constexpr eq(const TLhs&, const TRhs&) { }
+  constexpr eq(const TLhs& lhs, const TRhs& rhs) : lhs{lhs}, rhs{rhs} { }
   static_assert(type_traits::is_same_v<TLhs, TRhs>, "[ERROR] Comparision of different types is not allowed");
-  [[nodiscard]] constexpr explicit operator bool() const { return true; }
+  [[nodiscard]] constexpr explicit operator bool() const { return false; }
+  const TLhs& lhs; const TRhs& rhs;
 };
 template<class T> struct eq<T, T> {
   constexpr eq(const T& lhs, const T& rhs) : lhs{lhs}, rhs{rhs}, result{lhs == rhs} { }
-  constexpr friend auto operator<<(auto& os, eq&& expr) -> decltype(os) requires requires { os << expr.lhs; os << expr.lhs; } { return (os << expr.lhs << " == " << expr.rhs); }
+  constexpr friend auto operator<<(auto& os, const eq& expr) -> decltype(auto) requires requires { os << expr.lhs; os << expr.lhs; } { return (os << expr.lhs << " == " << expr.rhs); }
   [[nodiscard]] constexpr explicit operator bool() const { return result; }
   T lhs; T rhs; bool result{};
 };
 template<class T> requires type_traits::is_floating_point_v<T> struct eq<T, T> {
   constexpr eq(const T& lhs, const T& rhs) : lhs{lhs}, rhs{rhs} { }
-  constexpr friend auto operator<<(auto& os, eq&& expr) -> decltype(os) requires requires { os << expr.lhs; os << expr.lhs; } { return (os << expr.lhs << " == " << expr.rhs); }
+  constexpr friend auto operator<<(auto& os, const eq& expr) -> decltype(auto) requires requires { os << expr.lhs; os << expr.lhs; } { return (os << expr.lhs << " == " << expr.rhs); }
   [[nodiscard]] constexpr explicit operator bool() const {
     static_assert(!type_traits::is_floating_point_v<T>, "[ERROR] Epsilon is required: expect((4.2 == 4.2_d)(.01))");
     return {};
@@ -318,25 +310,26 @@ struct eq<TLhs, TRhs> {
       return true;
     }(lhs, rhs)
   } { }
-  constexpr friend auto operator<<(auto& os, eq&& expr) -> decltype(os) requires requires { os << expr.lhs; os << expr.lhs; } { return (os << expr.lhs << " == " << expr.rhs); }
+  constexpr friend auto operator<<(auto& os, const eq& expr) -> decltype(auto) requires requires { os << expr.lhs; os << expr.lhs; } { return (os << expr.lhs << " == " << expr.rhs); }
   [[nodiscard]] constexpr explicit operator bool() const { return result; }
   TLhs lhs; TRhs rhs; bool result{};
 };
 
 template<class TLhs, class TRhs> struct neq {
-  constexpr neq(const TLhs&, const TRhs&) { }
+  constexpr neq(const TLhs& lhs, const TRhs& rhs) : lhs{lhs}, rhs{rhs} { }
   static_assert(type_traits::is_same_v<TLhs, TRhs>, "[ERROR] Comparision of different types is not allowed");
-  [[nodiscard]] constexpr explicit operator bool() const { return true; }
+  [[nodiscard]] constexpr explicit operator bool() const { return false; }
+  const TLhs& lhs; const TRhs& rhs;
 };
 template<class T> struct neq<T, T> {
   constexpr neq(const T& lhs, const T& rhs) : lhs{lhs}, rhs{rhs}, result{lhs != rhs} { }
-  constexpr friend auto operator<<(auto& os, neq&& expr) -> decltype(os) requires requires { os << expr.lhs; os << expr.lhs; } { return (os << expr.lhs << " != " << expr.rhs); }
+  constexpr friend auto operator<<(auto& os, const neq& expr) -> decltype(auto) requires requires { os << expr.lhs; os << expr.lhs; } { return (os << expr.lhs << " != " << expr.rhs); }
   [[nodiscard]] constexpr explicit operator bool() const { return result; }
   T lhs; T rhs; bool result{};
 };
 template<class T> requires type_traits::is_floating_point_v<T> struct neq<T, T> {
   constexpr neq(const T& lhs, const T& rhs) : lhs{lhs}, rhs{rhs} { }
-  constexpr friend auto operator<<(auto& os, neq&& expr) -> decltype(os) requires requires { os << expr.lhs; os << expr.lhs; } { return (os << expr.lhs << " == " << expr.rhs); }
+  constexpr friend auto operator<<(auto& os, const neq& expr) -> decltype(auto) requires requires { os << expr.lhs; os << expr.lhs; } { return (os << expr.lhs << " == " << expr.rhs); }
   [[nodiscard]] constexpr explicit operator bool() const {
     static_assert(!type_traits::is_floating_point_v<T>, "[ERROR] Epsilon is required: expect((4.2 == 4.2_d)(.1))");
     return {};
@@ -352,56 +345,60 @@ template<class T> requires type_traits::is_floating_point_v<T> struct neq<T, T> 
 };
 
 template<class TLhs, class TRhs> struct gt {
-  constexpr gt(const TLhs&, const TRhs&) { }
+  constexpr gt(const TLhs& lhs, const TRhs& rhs) : lhs{lhs}, rhs{rhs} { }
   static_assert(type_traits::is_same_v<TLhs, TRhs>, "[ERROR] Comparision of different types is not allowed");
-  [[nodiscard]] constexpr explicit operator bool() const { return true; }
+  [[nodiscard]] constexpr explicit operator bool() const { return false; }
+  const TLhs& lhs; const TLhs& rhs;
 };
 template<class T> struct gt<T, T> {
   constexpr gt(const T& lhs, const T& rhs) : lhs{lhs}, rhs{rhs}, result{lhs > rhs} { }
-  constexpr friend auto operator<<(auto& os, gt&& expr) -> decltype(os) requires requires { os << expr.lhs; os << expr.lhs; } { return (os << expr.lhs << " > " << expr.rhs); }
+  constexpr friend auto operator<<(auto& os, const gt& expr) -> decltype(auto) requires requires { os << expr.lhs; os << expr.lhs; } { return (os << expr.lhs << " > " << expr.rhs); }
   [[nodiscard]] constexpr explicit operator bool() const { return result; }
   T lhs; T rhs; bool result{};
 };
 
 template<class TLhs, class TRhs> struct ge {
-  constexpr ge(const TLhs&, const TRhs&) { }
+  constexpr ge(const TLhs& lhs, const TRhs& rhs) : lhs{lhs}, rhs{rhs} { }
   static_assert(type_traits::is_same_v<TLhs, TRhs>, "[ERROR] Comparision of different types is not allowed");
-  [[nodiscard]] constexpr explicit operator bool() const { return true; }
+  [[nodiscard]] constexpr explicit operator bool() const { return false; }
+  const TLhs& lhs; const TLhs& rhs;
 };
 template<class T> struct ge<T, T> {
   constexpr ge(const T& lhs, const T& rhs) : lhs{lhs}, rhs{rhs}, result{lhs >= rhs} { }
-  constexpr friend auto operator<<(auto& os, ge&& expr) -> decltype(os) requires requires { os << expr.lhs; os << expr.lhs; } { return (os << expr.lhs << " >= " << expr.rhs); }
+  constexpr friend auto operator<<(auto& os, const ge& expr) -> decltype(auto) requires requires { os << expr.lhs; os << expr.lhs; } { return (os << expr.lhs << " >= " << expr.rhs); }
   [[nodiscard]] constexpr explicit operator bool() const { return result; }
   T lhs; T rhs; bool result{};
 };
 
 template<class TLhs, class TRhs> struct lt {
-  constexpr lt(const TLhs&, const TRhs&) { }
+  constexpr lt(const TLhs& lhs, const TRhs& rhs) : lhs{lhs}, rhs{rhs} { }
   static_assert(type_traits::is_same_v<TLhs, TRhs>, "[ERROR] Comparision of different types is not allowed");
-  [[nodiscard]] constexpr explicit operator bool() const { return true; }
+  [[nodiscard]] constexpr explicit operator bool() const { return false; }
+  const TLhs& lhs; const TLhs& rhs;
 };
 template<class T> struct lt<T, T> {
   constexpr lt(const T& lhs, const T& rhs) : lhs{lhs}, rhs{rhs}, result{lhs < rhs} { }
-  constexpr friend auto operator<<(auto& os, lt&& expr) -> decltype(os) requires requires { os << expr.lhs; os << expr.lhs; } { return (os << expr.lhs << " < " << expr.rhs); }
+  constexpr friend auto operator<<(auto& os, const lt& expr) -> decltype(auto) requires requires { os << expr.lhs; os << expr.lhs; } { return (os << expr.lhs << " < " << expr.rhs); }
   [[nodiscard]] constexpr explicit operator bool() const { return result; }
   T lhs; T rhs; bool result{};
 };
 
 template<class TLhs, class TRhs> struct le {
-  constexpr le(const TLhs&, const TRhs&) { }
+  constexpr le(const TLhs& lhs, const TRhs& rhs) : lhs{lhs}, rhs{rhs} { }
   static_assert(type_traits::is_same_v<TLhs, TRhs>, "[ERROR] Comparision of different types is not allowed");
-  [[nodiscard]] constexpr explicit operator bool() const { return true; }
+  [[nodiscard]] constexpr explicit operator bool() const { return false; }
+  const TLhs& lhs; const TLhs& rhs;
 };
 template<class T> struct le<T, T> {
   constexpr le(const T& lhs, const T& rhs) : lhs{lhs}, rhs{rhs}, result{lhs <= rhs} { }
-  constexpr friend auto operator<<(auto& os, le&& expr) -> decltype(os) requires requires { os << expr.lhs; os << expr.lhs; } { return (os << expr.lhs << " <= " << expr.rhs); }
+  constexpr friend auto operator<<(auto& os, const le& expr) -> decltype(auto) requires requires { os << expr.lhs; os << expr.lhs; } { return (os << expr.lhs << " <= " << expr.rhs); }
   [[nodiscard]] constexpr explicit operator bool() const { return result; }
   T lhs; T rhs; bool result{};
 };
 
 template<class T> struct nt {
   constexpr nt(const T& t) : t{t}, result{!t} { }
-  constexpr friend auto operator<<(auto& os, nt&& expr) -> decltype(os) requires requires { os << expr.t; } { return (os << "!" << expr.t); }
+  constexpr friend auto operator<<(auto& os, const nt& expr) -> decltype(auto) requires requires { os << expr.t; } { return (os << "!" << expr.t); }
   [[nodiscard]] constexpr explicit operator bool() const { return result; }
   T t; bool result{};
 };
@@ -451,21 +448,19 @@ struct _ull { unsigned long long VALUE{}; };
 struct _f { float VALUE{}; constexpr auto operator-() const { return _f(-VALUE); } };
 struct _d { double VALUE{}; constexpr auto operator-() const { return _d(-VALUE); } };
 struct _ld { long double VALUE{}; constexpr auto operator-() const { return _ld(-VALUE); } };
-#if (UT2_HAS_CSTDINT)
-struct _i8 { std::int8_t VALUE{}; constexpr auto operator-() const { return _i8(-VALUE); } };
-struct _i16 { std::int16_t VALUE{}; constexpr auto operator-() const { return _i16(-VALUE); } };
-struct _i32 { std::int32_t VALUE{}; constexpr auto operator-() const { return _i32(-VALUE); } };
-struct _i64 { std::int64_t VALUE{}; constexpr auto operator-() const { return _i64(-VALUE); } };
-struct _u8 { std::uint8_t VALUE{}; };
-struct _u16 { std::int16_t VALUE{}; };
-struct _u32 { std::uint32_t VALUE{}; };
-struct _u64 { std::uint64_t VALUE{}; };
-#endif
+struct _i8 { __INT8_TYPE__ VALUE{}; constexpr auto operator-() const { return _i8(-VALUE); } };
+struct _i16 { __INT16_TYPE__ VALUE{}; constexpr auto operator-() const { return _i16(-VALUE); } };
+struct _i32 { __INT32_TYPE__ VALUE{}; constexpr auto operator-() const { return _i32(-VALUE); } };
+struct _i64 { __INT64_TYPE__ VALUE{}; constexpr auto operator-() const { return _i64(-VALUE); } };
+struct _u8 { __UINT8_TYPE__ VALUE{}; };
+struct _u16 { __UINT16_TYPE__ VALUE{}; };
+struct _u32 { __UINT32_TYPE__ VALUE{}; };
+struct _u64 { __UINT64_TYPE__ VALUE{}; };
 struct _string {
   struct view {
     [[nodiscard]] constexpr auto operator[](auto i) const { return data_[i]; }
     [[nodiscard]] constexpr auto size() const { return size_; }
-    constexpr friend auto operator<<(auto& os, view&& v) -> decltype(os) { return (os << v.data_); }
+    constexpr friend auto operator<<(auto& os, const view& v) -> decltype(auto) { return (os << v.data_); }
     [[nodiscard]] constexpr auto operator==(const view& other) const -> bool {
       if (size() != other.size()) { return false; }
       for (decltype(size()) i{}; i < size(); ++i) { if ((*this)[i] != other[i]) { return false; } }
@@ -489,7 +484,6 @@ struct _string {
 [[nodiscard]] constexpr auto operator""_f(long double value) { return _f(value); }
 [[nodiscard]] constexpr auto operator""_d(long double value) { return _d(value); }
 [[nodiscard]] constexpr auto operator""_ld(long double value) { return _ld(value); }
-#if (UT2_HAS_CSTDINT)
 [[nodiscard]] constexpr auto operator""_i8(unsigned long long int value) { return _i8(value); }
 [[nodiscard]] constexpr auto operator""_i16(unsigned long long int value) { return _i16(value); }
 [[nodiscard]] constexpr auto operator""_i32(unsigned long long int value) { return _i32(value); }
@@ -498,7 +492,6 @@ struct _string {
 [[nodiscard]] constexpr auto operator""_u16(unsigned long long int value) { return _u16(value); }
 [[nodiscard]] constexpr auto operator""_u32(unsigned long long int value) { return _u32(value); }
 [[nodiscard]] constexpr auto operator""_u64(unsigned long long int value) { return _u64(value); }
-#endif
 template<utility::fixed_string Str> [[nodiscard]] constexpr auto operator""_s() { return _string{Str.data(), Str.size()-1u}; }
 } // namespace ut
 
@@ -670,16 +663,14 @@ static_assert(([] {
     static_assert(-_d{4.2}.VALUE < double(0));
     static_assert(-_ld{4.2}.VALUE < ld(0));
 
-    #if (UT2_HAS_CSTDINT)
-      static_assert(std::int8_t(-42) == -_i8{42}.VALUE);
-      static_assert(std::int16_t(-42) == -_i16{42}.VALUE);
-      static_assert(std::int32_t(-42) == -_i32{42}.VALUE);
-      static_assert(std::int64_t(-42) == -_i64{42}.VALUE);
-      static_assert(std::uint8_t(42) == _u8{42}.VALUE);
-      static_assert(std::int16_t(42) == _u16{42}.VALUE);
-      static_assert(std::uint32_t(42) == _u32{42}.VALUE);
-      static_assert(std::uint64_t(42) == _u64{42}.VALUE);
-    #endif
+    static_assert((__INT8_TYPE__)(-42) == -_i8{42}.VALUE);
+    static_assert((__INT16_TYPE__)(-42) == -_i16{42}.VALUE);
+    static_assert((__INT32_TYPE__)(-42) == -_i32{42}.VALUE);
+    static_assert((__INT64_TYPE__)(-42) == -_i64{42}.VALUE);
+    static_assert((__UINT8_TYPE__)(42) == _u8{42}.VALUE);
+    static_assert((__UINT16_TYPE__)(42) == _u16{42}.VALUE);
+    static_assert((__UINT32_TYPE__)(42) == _u32{42}.VALUE);
+    static_assert((__UINT64_TYPE__)(42) == _u64{42}.VALUE);
 
     static_assert(sizeof("foo") == _string::view{"foo", sizeof("foo")}.size());
     static_assert('f' == _string::view{"foo", sizeof("foo")}[0]);
@@ -710,16 +701,14 @@ static_assert(([] {
     static_assert(!(.13f == .12_f)(.001));
     static_assert((-9.12345678 == -9.12345678_d)(.00001));
 
-    #if (UT2_HAS_CSTDINT)
-      static_assert(std::int8_t(-42) == -42_i8);
-      static_assert(std::int16_t(-42) == -42_i16);
-      static_assert(std::int32_t(-42) == -42_i32);
-      static_assert(std::int64_t(-42) == -42_i64);
-      static_assert(std::uint8_t(42) == 42_u8);
-      static_assert(std::int16_t(42) == 42_u16);
-      static_assert(std::uint32_t(42) == 42_u32);
-      static_assert(std::uint64_t(42) == 42_u64);
-    #endif
+    static_assert((__INT8_TYPE__)(-42) == -42_i8);
+    static_assert((__INT16_TYPE__)(-42) == -42_i16);
+    static_assert((__INT32_TYPE__)(-42) == -42_i32);
+    static_assert((__INT64_TYPE__)(-42) == -42_i64);
+    static_assert((__UINT8_TYPE__)(42) == 42_u8);
+    static_assert((__UINT16_TYPE__)(42) == 42_u16);
+    static_assert((__UINT32_TYPE__)(42) == 42_u32);
+    static_assert((__UINT64_TYPE__)(42) == 42_u64);
 
     static_assert(sizeof("")-1u == ""_s.VALUE.size());
     static_assert(sizeof("foo")-1u == "foo"_s.VALUE.size());
