@@ -170,6 +170,7 @@ extern basic_ostream<char, char_traits<char>> clog; // only used if defined
 } // namespace std
 
 namespace ut::inline v2_0_0 {
+template<class...>
 struct default_cfg {
   struct {
     friend constexpr decltype(auto) operator<<([[maybe_unused]] auto& os, [[maybe_unused]] const auto& t) {
@@ -195,7 +196,7 @@ struct override { };
  * template<class... Ts> auto ut::cfg<ut::override, Ts...> = my_config{};
  * @endcode
  */
-template <class...> inline default_cfg cfg{};
+template <class... Ts> inline default_cfg<Ts...> cfg{};
 
 namespace detail {
 template<class... Ts>

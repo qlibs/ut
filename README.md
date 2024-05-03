@@ -1,7 +1,7 @@
 <a href="http://www.boost.org/LICENSE_1_0.txt" target="_blank">![Boost Licence](http://img.shields.io/badge/license-boost-blue.svg)</a>
 <a href="https://github.com/boost-ext/ut2/releases" target="_blank">![Version](https://badge.fury.io/gh/boost-ext%2Fut2.svg)</a>
-<a href="https://godbolt.org/z/cbshMjocd">![build](https://img.shields.io/badge/build-blue.svg)</a>
-<a href="https://godbolt.org/z/MhMxP31fc">![Try it online](https://img.shields.io/badge/try%20it-online-blue.svg)</a>
+<a href="https://godbolt.org/z/afY3dY8bY">![build](https://img.shields.io/badge/build-blue.svg)</a>
+<a href="https://godbolt.org/z/9d6PTEfbf">![Try it online](https://img.shields.io/badge/try%20it-online-blue.svg)</a>
 
 ---------------------------------------
 
@@ -20,7 +20,7 @@
 - Explicit by design (no implicit conversions, narrowing, epsilon-less floating point comparisions, ...)
 - Minimal [API](#api)
 - Reflection integration (optional via https://github.com/boost-ext/reflect)
-- Compiles cleanly with ([`-fno-exceptions -fno-rtti -Wall -Wextra -Werror -pedantic -pedantic-errors`](https://godbolt.org/z/cbshMjocd))
+- Compiles cleanly with ([`-fno-exceptions -fno-rtti -Wall -Wextra -Werror -pedantic -pedantic-errors`](https://godbolt.org/z/ceK6qsx68))
 - Fast compilation times (see [compilation times](#comp))
 - Fast run-time execution (see [performance](#perf))
 - Verifies itself upon include (aka run all tests via static_asserts but it can be disabled - see [FAQ](#faq))
@@ -29,17 +29,17 @@
 
 ### Requirements
 
-- C++20 ([gcc-12+, clang-16+](https://godbolt.org/z/cbshMjocd))
+- C++20 ([gcc-12+, clang-16+](https://godbolt.org/z/ceK6qsx68))
 
 ---
 
 ### Examples
 
-> Hello world (https://godbolt.org/z/MhMxP31fc)
+> Hello world (https://godbolt.org/z/9d6PTEfbf)
 
 ```cpp
-#include <iostream> // output at run-time
 #include <ut2>
+#include <iostream> // output at run-time
 
 constexpr auto sum(auto... args) { return (args + ...); }
 
@@ -59,7 +59,7 @@ $CXX example.cpp -std=c++20 -o example && ./example
 PASSED: tests: 1 (1 passed, 0 failed, 1 compile-time), asserts: 3 (3 passed, 0 failed)
 ```
 
-> Execution model (https://godbolt.org/z/oe3E6azMh)
+> Execution model (https://godbolt.org/z/48PGjz3x9)
 
 ```cpp
 static_assert(("sum"_test = [] { // compile-time only
@@ -98,7 +98,7 @@ example.cpp:14:FAILED:"sum": 6 == 5
 FAILED: tests: 3 (2 passed, 1 failed, 0 compile-time), asserts: 2 (1 passed, 1 failed)
 ```
 
-> Constant evaluation (https://godbolt.org/z/K3szf317T)
+> Constant evaluation (https://godbolt.org/z/v1snWP5K3)
 
 ```cpp
 constexpr auto test() {
@@ -121,7 +121,7 @@ $CXX example.cpp -std=c++20 -o example && ./example
 PASSED: tests: 2 (2 passed, 0 failed, 1 compile-time), asserts: 1 (1 passed, 0 failed)
 ```
 
-> Suites/Sub-tests (https://godbolt.org/z/a9nceoPKn)
+> Suites/Sub-tests (https://godbolt.org/z/Mbzc9s3ad)
 
 ```cpp
 ut::suite test_suite = [] {
@@ -146,7 +146,7 @@ $CXX example.cpp -std=c++20 -o example && ./example
 PASSED: tests: 2 (2 passed, 0 failed, 1 compile-time), asserts: 4 (4 passed, 0 failed)
 ```
 
-> Assertions (https://godbolt.org/z/57KxPsTsE)
+> Assertions (https://godbolt.org/z/W8qnMsrGo)
 
 ```cpp
 int main() {
@@ -180,7 +180,7 @@ example.cpp:21:FAILED:"fatal": 1 > 1
 FAILED: tests: 3 (2 passed, 1 failed, 3 compile-time), asserts: 5 (4 passed, 1 failed)
 ```
 
-> Errors/Checks (https://godbolt.org/z/n48qPs8K9)
+> Errors/Checks (https://godbolt.org/z/Tvnce9j4d)
 
 ```cpp
 int main() {
@@ -274,7 +274,7 @@ time $CXX -x c++ -std=c++20 ut2 -c -DDISABLE_STATIC_ASSERT_TESTS # 0.028s
 time $CXX -x c++ -std=c++20 ut2 -c                               # 0.049s
 ```
 
-> Benchmark - 100 tests, 1000 asserts (https://godbolt.org/z/ezj4ndn3e)
+> Benchmark - 100 tests, 1000 asserts (https://godbolt.org/z/xhfc518xx)
 
 ```cpp
 [ut]:  time $CXX benchmark.cpp -std=c++20                               # 0m13.498s
@@ -288,14 +288,14 @@ time $CXX -x c++ -std=c++20 ut2 -c                               # 0.049s
 <a name="perf"></a>
 ### Performance
 
-> Benchmark - 100 tests, 1000 asserts (https://godbolt.org/z/ezj4ndn3e)
+> Benchmark - 100 tests, 1000 asserts (https://godbolt.org/z/6WzxvjEex)
 
 ```cpp
 time ./benchmark # 0m0.002s (-O3)
 time ./benchmark # 0m0.013s (-g)
 ```
 
-> X86-64 assembly -O3 (https://godbolt.org/z/qKs47PP9G)
+> X86-64 assembly -O3 (https://godbolt.org/z/x6GYbs4hT)
 
 ```cpp
 int main() {
