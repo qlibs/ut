@@ -401,7 +401,7 @@ template<class T> struct le<T, T> {
 
 template<class T> struct nt {
   constexpr nt(const T& t) : t{t}, result{!t} { }
-  constexpr friend auto operator<<(auto& os, const nt& expr) -> decltype(auto) requires requires { os << expr.t; } { return (os << "!" << expr.t); }
+  constexpr friend auto operator<<(auto& os, const nt& expr) -> decltype(auto) { return (os << "!" << expr.t); }
   [[nodiscard]] constexpr explicit operator bool() const { return result; }
   T t; bool result{};
 };
