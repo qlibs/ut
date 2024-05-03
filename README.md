@@ -282,7 +282,7 @@ time $CXX -x c++ -std=c++20 ut2 -c                               # 0.049s
 [ut2]: time $CXX benchmark.cpp -std=c++20 -DDISABLE_STATIC_ASSERT_TESTS # 0m0.758s
 -------------------------------------------------------------------------
 [ut]  https://github.com/boost-ext/ut/releases/tag/v2.0.1
-[ut2] https://github.com/boost-ext/ut2/releases/tag/v2.0.0
+[ut2] https://github.com/boost-ext/ut2/releases/tag/v2.1.0
 ```
 
 <a name="perf"></a>
@@ -307,7 +307,7 @@ int main() {
 
 ```cpp
 main:
-  mov  rax, qword ptr [rip + cfg<ut::v2_0_0::override>+136]
+  mov  rax, qword ptr [rip + cfg<ut::v2_1_0::override>+136]
   inc  dword ptr [rax + 24]
   mov  ecx, dword ptr [rax + 8]
   mov  edx, dword ptr [rax + 92]
@@ -320,8 +320,8 @@ main:
   mov  dword ptr [rax + 16], 6
   lea  rcx, [rip + template parameter object for fixed_string
   mov  qword ptr [rax + 24], rcx
-  inc  dword ptr [rip + ut::v2_0_0::cfg<ut::v2_0_0::override>+52]
-  mov  rax, qword ptr [rip + ut::v2_0_0::cfg<ut::v2_0_0::override>+136]
+  inc  dword ptr [rip + ut::v2_1_0::cfg<ut::v2_1_0::override>+52]
+  mov  rax, qword ptr [rip + ut::v2_1_0::cfg<ut::v2_1_0::override>+136]
   mov  ecx, dword ptr [rax + 8]
   mov  edx, dword ptr [rax + 92]
   dec  edx
@@ -578,7 +578,7 @@ template <class...> inline auto cfg = default_cfg{};
 ```
 
 ```cpp
-#define UT2 2'0'0                   // Current library version (SemVer)
+#define UT2 2'1'0                   // Current library version (SemVer)
 #define UT_RUN_TIME_ONLY            // If defined tests will be executed
                                     // at run-time + static_assert tests
 #define UT_COMPILE_TIME_ONLY        // If defined only compile-time tests
@@ -609,7 +609,7 @@ template <class...> inline auto cfg = default_cfg{};
     CPMAddPackage(
       Name ut2
       GITHUB_REPOSITORY boost-ext/ut2
-      GIT_TAG v2.0.0
+      GIT_TAG v2.1.0
     )
     add_library(ut2 INTERFACE)
     target_include_directories(ut2 SYSTEM INTERFACE ${ut2_SOURCE_DIR})

@@ -6,9 +6,9 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 #ifndef UT2
-#define UT2 2'0'0 // SemVer
+#define UT2 2'1'0 // SemVer
 
-namespace ut::inline v2_0_0 {
+namespace ut::inline v2_1_0 {
 namespace type_traits {
 template<class, class> inline constexpr auto is_same_v = false;
 template<class T> inline constexpr auto is_same_v<T, T> = true;
@@ -169,7 +169,7 @@ template<class, class> class basic_ostream;
 extern basic_ostream<char, char_traits<char>> clog; // only used if defined
 } // namespace std
 
-namespace ut::inline v2_0_0 {
+namespace ut::inline v2_1_0 {
 template<class...>
 struct default_cfg {
   struct {
