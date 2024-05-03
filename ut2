@@ -294,13 +294,13 @@ template<class T> requires type_traits::is_floating_point_v<T> struct eq<T, T> {
     static_assert(!type_traits::is_floating_point_v<T>, "[ERROR] Epsilon is required: expect((4.2 == 4.2_d)(.01))");
     return {};
   }
-  [[nodiscard]] constexpr auto operator()(T epsilon) {
-    struct {
-      bool result{};
-      [[nodiscard]] constexpr explicit operator bool() const { return result; }
-    } result{(lhs < rhs ? rhs - lhs : lhs - rhs) < epsilon};
-    return result;
-  }
+  struct epsilon {
+    constexpr epsilon(const T& lhs, const T& rhs, const T e) : lhs{lhs}, rhs{rhs}, e{e}, result{(lhs < rhs ? rhs - lhs : lhs - rhs) < e} { }
+    [[nodiscard]] constexpr explicit operator bool() const { return result; }
+    constexpr friend auto operator<<(auto& os, const epsilon& expr) -> decltype(auto) { return (os << "(" << expr.lhs << " == " << expr.rhs << ")(" << expr.e <<")"); }
+    T lhs; T rhs; T e; bool result{};
+  };
+  [[nodiscard]] constexpr auto operator()(T e) const { return epsilon{lhs, rhs, e}; }
   T lhs; T rhs;
 };
 template<class TLhs, class TRhs>
@@ -333,18 +333,18 @@ template<class T> struct neq<T, T> {
 };
 template<class T> requires type_traits::is_floating_point_v<T> struct neq<T, T> {
   constexpr neq(const T& lhs, const T& rhs) : lhs{lhs}, rhs{rhs} { }
-  constexpr friend auto operator<<(auto& os, const neq& expr) -> decltype(auto) { return (os << expr.lhs << " == " << expr.rhs); }
+  constexpr friend auto operator<<(auto& os, const neq& expr) -> decltype(auto) { return (os << expr.lhs << " != " << expr.rhs); }
   [[nodiscard]] constexpr explicit operator bool() const {
-    static_assert(!type_traits::is_floating_point_v<T>, "[ERROR] Epsilon is required: expect((4.2 == 4.2_d)(.1))");
+    static_assert(!type_traits::is_floating_point_v<T>, "[ERROR] Epsilon is required: expect((4.2 != 4.2_d)(.1))");
     return {};
   }
-  [[nodiscard]] constexpr auto operator()(T epsilon) {
-    struct {
-      bool result{};
-      [[nodiscard]] constexpr explicit operator bool() const { return result; }
-    } result{(lhs < rhs ? rhs - lhs : lhs - rhs) >= epsilon};
-    return result;
-  }
+  struct epsilon {
+    constexpr epsilon(const T& lhs, const T& rhs, const T e) : lhs{lhs}, rhs{rhs}, e{e}, result{(lhs < rhs ? rhs - lhs : lhs - rhs) >= e} { }
+    [[nodiscard]] constexpr explicit operator bool() const { return result; }
+    constexpr friend auto operator<<(auto& os, const epsilon& expr) -> decltype(auto) { return (os << "(" << expr.lhs << " != " << expr.rhs << ")(" << expr.e <<")"); }
+    T lhs; T rhs; T e; bool result{};
+  };
+  [[nodiscard]] constexpr auto operator()(T e) const { return epsilon{lhs, rhs, e}; }
   T lhs; T rhs;
 };
 
