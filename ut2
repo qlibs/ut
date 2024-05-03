@@ -59,8 +59,7 @@ class outputter {
   template<class TExpr> constexpr auto on(const events::assert_fail<TExpr>& event) {
     if (!__builtin_is_constant_evaluated()) {
       if (initial_new_line == '\n') { os << initial_new_line; } else { initial_new_line = '\n'; }
-      os << event.file_name << ':' << event.line << ':' << "FAILED:" << '\"' << current_test.name << "\": ";
-      if constexpr (requires { os << event.expr; }) { os << event.expr; }
+      os << event.file_name << ':' << event.line << ':' << "FAILED:" << '\"' << current_test.name << "\": " << event.expr;
     }
   }
   constexpr auto on(const events::fatal&) { }
@@ -122,8 +121,9 @@ struct reporter {
     outputter.on(summary);
     __builtin_abort();
   }
+
 #if !defined(UT_COMPILE_TIME_ONLY)
-  constexpr ~reporter() {
+  ~reporter() { // non constexpr
     outputter.on(summary);
     if (summary.asserts[events::summary::FAILED]) {
       __builtin_abort();
@@ -170,12 +170,13 @@ struct runner {
 
 struct default_cfg {
   struct {
-    constexpr decltype(auto) operator<<(const auto& t) {
-      if constexpr (requires { std::clog << t; }) {
+    friend constexpr decltype(auto) operator<<([[maybe_unused]] auto& os, [[maybe_unused]] const auto& t) {
+      #if defined(UT_COMPILE_TIME_ONLY)
+        return os;
+      #else
+        static_assert(requires { std::clog << t; }, "[ERROR] No output supported: Consider #include <iostream> | ut::cfg<ut::override> = custom_cfg{} | #define UT_COMPILE_TIME_ONLY");
         return (std::clog << t);
-      } else {
-        return *this;
-      }
+      #endif
     }
   } stream;
   ut::outputter<decltype(stream)> outputter{stream};
