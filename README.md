@@ -224,7 +224,7 @@ $CXX example.cpp -std=c++20 -o example && ./example
 PASSED: tests: 1 (1 passed, 0 failed, 1 compile-time), asserts: 3 (3 passed, 0 failed)
 ```
 
-> Custom configuration (https://godbolt.org/z/qMhdYnhMP)
+> Custom configuration (https://godbolt.org/z/3qz5vG6nq)
 
 ```cpp
 struct outputter {
@@ -248,7 +248,8 @@ struct custom_config {
   ut::runner<decltype(reporter)> runner{reporter};
 };
 
-template<class... Ts> auto ut::cfg<ut::override, Ts...> = custom_config{};
+template<>
+auto ut::cfg<ut::override> = custom_config{};
 
 int main() {
   "config"_test = [] mutable {
