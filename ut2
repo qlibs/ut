@@ -501,7 +501,7 @@ template<utility::fixed_string Str> [[nodiscard]] constexpr auto operator""_s() 
 
 using ut::operator""_test;
 
-#if !defined(DISABLE_STATIC_ASSERT_TESTS)
+#if !defined(NTEST)
 static_assert(([] {
   // ut::type_traits::is_same_v
   {

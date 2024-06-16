@@ -271,16 +271,16 @@ echo $? # 139 # no output
 > Include - no iostream (https://raw.githubusercontent.com/boost-ext/ut2/main/ut2)
 
 ```cpp
-time $CXX -x c++ -std=c++20 ut2 -c -DDISABLE_STATIC_ASSERT_TESTS # 0.028s
-time $CXX -x c++ -std=c++20 ut2 -c                               # 0.049s
+time $CXX -x c++ -std=c++20 ut2 -c -DNTEST          # 0.028s
+time $CXX -x c++ -std=c++20 ut2 -c                  # 0.049s
 ```
 
 > Benchmark - 100 tests, 1000 asserts (https://godbolt.org/z/xhfc518xx)
 
 ```cpp
-[ut]:  time $CXX benchmark.cpp -std=c++20                               # 0m13.498s
-[ut2]: time $CXX benchmark.cpp -std=c++20                               # 0m0.813s
-[ut2]: time $CXX benchmark.cpp -std=c++20 -DDISABLE_STATIC_ASSERT_TESTS # 0m0.758s
+[ut]:  time $CXX benchmark.cpp -std=c++20           # 0m13.498s
+[ut2]: time $CXX benchmark.cpp -std=c++20           # 0m0.813s
+[ut2]: time $CXX benchmark.cpp -std=c++20 -DNTEST   # 0m0.758s
 -------------------------------------------------------------------------
 [ut]  https://github.com/boost-ext/ut/releases/tag/v2.0.1
 [ut2] https://github.com/boost-ext/ut2/releases/tag/v2.1.1
@@ -579,14 +579,14 @@ template <class...> inline auto cfg = default_cfg{};
 ```
 
 ```cpp
-#define UT2 2'1'1                   // Current library version (SemVer)
-#define UT_RUN_TIME_ONLY            // If defined tests will be executed
-                                    // at run-time + static_assert tests
-#define UT_COMPILE_TIME_ONLY        // If defined only compile-time tests
-                                    // will be executed
-#define DISABLE_STATIC_ASSERT_TESTS // If defined it disables running
-                                    // static_asserts tests for the UT library
-                                    // (user tests are not affected)
+#define UT2 2'1'1               // Current library version (SemVer)
+#define UT_RUN_TIME_ONLY        // If defined tests will be executed
+                                // at run-time + static_assert tests
+#define UT_COMPILE_TIME_ONLY    // If defined only compile-time tests
+                                // will be executed
+#define NTEST                   // If defined it disables running
+                                // static_asserts tests for the UT library
+                                // (user tests are not affected)
 ```
 
 ---
@@ -601,7 +601,7 @@ template <class...> inline auto cfg = default_cfg{};
 
 - Can I disable running tests at compile-time for faster compilation times?
 
-    > When `DISABLE_STATIC_ASSERT_TESTS` is defined static_asserts tests won't be executed upon inclusion.
+    > When `NTEST` is defined static_asserts tests won't be executed upon inclusion.
     Note: Use with caution as disabling tests means that there are no guarantees upon inclusion that the given compiler/env combination works as expected.
 
 - How to integrate with CMake/CPM?
