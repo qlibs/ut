@@ -7,7 +7,7 @@
 
 > "If you liked it then you `"should have put a"_test` on it", Beyonce rule
 
-## UT2: C++20 minimal/compile-time first unit-testing library
+## UT2: C++20 minimal unit-testing library
 
 > https://en.wikipedia.org/wiki/Unit_testing
 
