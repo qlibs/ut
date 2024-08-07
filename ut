@@ -21,7 +21,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
-#ifdef README
+#if 0
 // -->
 [![MIT Licence](http://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/license/mit)
 [![Version](https://badge.fury.io/gh/qlibs%2Fut.svg)](https://github.com/qlibs/ut/releases)
@@ -602,14 +602,10 @@ template <class...> inline auto cfg = default_cfg{};
 ```
 
 ```cpp
-#define UT 2'1'2                // Current library version (SemVer)
 #define UT_RUN_TIME_ONLY        // If defined tests will be executed
                                 // at run-time + static_assert tests
 #define UT_COMPILE_TIME_ONLY    // If defined only compile-time tests
                                 // will be executed
-#define NTEST                   // If defined it disables running
-                                // static_asserts tests for the UT library
-                                // (user tests are not affected)
 ```
 
 ---
@@ -641,9 +637,9 @@ template <class...> inline auto cfg = default_cfg{};
 - Similar projects?
     > [ut](https://github.com/boost-ext/ut), [catch2](https://github.com/catchorg/Catch2), [googletest](https://github.com/google/googletest), [gunit](https://github.com/cpp-testing/GUnit), [boost.test](https://www.boost.org/doc/libs/latest/libs/test/doc/html/index.html)
 <!--
-#else
-#ifndef UT
-#define UT 2'1'2 // SemVer
+#endif
+
+#pragma once
 
 namespace ut::inline v2_1_2 {
 namespace type_traits {
@@ -1376,5 +1372,3 @@ static_assert(([] {
   }
 }(), true));
 #endif // NTEST
-#endif // UT
-#endif // README
