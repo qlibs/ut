@@ -22,19 +22,15 @@
 // SOFTWARE.
 //
 #if 0
-// -->
+// --> ```UT: C++20 unit-testing library```
+> https://en.wikipedia.org/wiki/Unit_testing
+
 [![MIT Licence](http://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/license/mit)
 [![Version](https://badge.fury.io/gh/qlibs%2Fut.svg)](https://github.com/qlibs/ut/releases)
 [![build](https://img.shields.io/badge/build-blue.svg)](https://godbolt.org/z/f3WPzK5xf)
 [![Try it online](https://img.shields.io/badge/try%20it-online-blue.svg)](https://godbolt.org/z/MG5cjnsbM)
 
----------------------------------------
-
 > "If you liked it then you `"should have put a"_test` on it", Beyonce rule
-
-## UT: C++20 minimal unit-testing library
-
-> https://en.wikipedia.org/wiki/Unit_testing
 
 ### Features
 
