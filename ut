@@ -629,11 +629,11 @@ template <class...> inline auto cfg = default_cfg{};
     )
     add_library(ut INTERFACE)
     target_include_directories(ut SYSTEM INTERFACE ${ut_SOURCE_DIR})
-    add_library(ut::ut ALIAS ut)
+    add_library(qlibs::ut ALIAS ut)
     ```
 
     ```
-    target_link_libraries(${PROJECT_NAME} ut::ut);
+    target_link_libraries(${PROJECT_NAME} qlibs::ut);
     ```
 
 - Similar projects?
