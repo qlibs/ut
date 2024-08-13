@@ -818,6 +818,8 @@ struct runner {
           }
         }
 #endif
+        reporter.on(events::test_end<events::mode::run_time>{file_name, line, name});
+      #endif
     }
     return true;
   }
