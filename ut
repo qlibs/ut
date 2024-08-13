@@ -641,6 +641,13 @@ template <class...> inline auto cfg = default_cfg{};
 <!--
 #endif
 
+#if __cpp_exceptions < 199711L
+#define UT_NO_EXCEPTIONS
+#else
+#include <exception>
+#include <stdexcept>
+#endif
+
 #pragma once
 
 namespace ut::inline v2_1_2 {
@@ -673,6 +680,7 @@ template<mode Mode> struct test_begin { const char* file_name{}; int line{}; con
 template<mode Mode> struct test_end { const char* file_name{}; int line{}; const char* name{}; enum { FAILED, PASSED, COMPILE_TIME } result{}; };
 template<class TExpr> struct assert_pass { const char* file_name{}; int line{}; TExpr expr{}; };
 template<class TExpr> struct assert_fail { const char* file_name{}; int line{}; TExpr expr{}; };
+struct exception_fail { const char* file_name{}; int line{}; const char* name{}; const char* except{}; };
 struct fatal { };
 template<class TMsg> struct log { const TMsg& msg; bool result{}; };
 struct summary { enum { FAILED, PASSED, COMPILE_TIME }; unsigned asserts[2]{}; /* FAILED, PASSED */ unsigned tests[3]{}; /* FAILED, PASSED, COMPILE_TIME */ };
@@ -690,6 +698,10 @@ class outputter {
       if (initial_new_line == '\n') { os << initial_new_line; } else { initial_new_line = '\n'; }
       os << event.file_name << ':' << event.line << ':' << "FAILED:" << '\"' << current_test.name << "\": " << event.expr;
     }
+  }
+  constexpr auto on(const events::exception_fail& event) {
+    if (initial_new_line == '\n') { os << initial_new_line; } else { initial_new_line = '\n'; }
+    os << event.file_name << ':' <<event.line << ':' << "EXCEPTION: " << '\"' << current_test.name << "\": " << event.except << "\n";
   }
   constexpr auto on(const events::fatal&) { }
   template<class TMsg> constexpr auto on(const events::log<TMsg>& event) {
@@ -744,6 +756,10 @@ struct reporter {
     ++summary.asserts[events::summary::FAILED];
     outputter.on(event);
   }
+  constexpr auto on(const events::exception_fail& event) {
+    ++summary.asserts[events::summary::FAILED];
+    outputter.on(event);
+  }
   constexpr auto on(const events::fatal& event) {
     ++summary.tests[events::summary::FAILED];
     outputter.on(event);
@@ -787,9 +803,21 @@ struct runner {
 
       #ifndef UT_COMPILE_TIME_ONLY
         reporter.on(events::test_begin<events::mode::run_time>{file_name, line, name});
-        test();
-        reporter.on(events::test_end<events::mode::run_time>{file_name, line, name});
-      #endif
+#ifndef UT_NO_EXCEPTIONS
+        try {
+#endif
+          test();
+#ifndef UT_NO_EXCEPTIONS
+        } catch (const char* string) {
+          reporter.on(events::exception_fail{ file_name, line, name, string });
+        } catch(...) {
+          try {
+            std::rethrow_exception(std::current_exception());
+          } catch (const std::exception& ex) {
+            reporter.on(events::exception_fail{ file_name, line, name, ex.what() });
+          }
+        }
+#endif
     }
     return true;
   }
