@@ -619,21 +619,22 @@ template <class...> inline auto cfg = default_cfg{};
     > When `NTEST` is defined static_asserts tests wont be executed upon inclusion.
     Note: Use with caution as disabling tests means that there are no guarantees upon inclusion that the given compiler/env combination works as expected.
 
-- How to integrate with CMake/CPM?
+- How to integrate with [CMake.FetchContent](https://cmake.org/cmake/help/latest/module/FetchContent.html)?
 
     ```
-    CPMAddPackage(
-      Name ut
-      GITHUB_REPOSITORY qlibs/ut
+    include(FetchContent)
+
+    FetchContent_Declare(
+      qlibs.ut
+      GIT_REPOSITORY https://github.com/qlibs/ut
       GIT_TAG v2.1.2
     )
-    add_library(ut INTERFACE)
-    target_include_directories(ut SYSTEM INTERFACE ${ut_SOURCE_DIR})
-    add_library(qlibs::ut ALIAS ut)
+
+    FetchContent_MakeAvailable(qlibs.ut)
     ```
 
     ```
-    target_link_libraries(${PROJECT_NAME} qlibs::ut);
+    target_link_libraries(${PROJECT_NAME} PUBLIC qlibs.ut);
     ```
 
 - Similar projects?
