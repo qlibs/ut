@@ -38,8 +38,7 @@
 
 ### Features
 
-- Single header (https://raw.githubusercontent.com/qliqbs/ut/main/ut)
-    - Easy integration (see [FAQ](#faq))
+- Single header (https://raw.githubusercontent.com/qlibs/ut/main/ut - for integration see [FAQ](#faq))
 - Compile-time first (executes tests at compile-time and/or run-time)
     - Detects memory leaks and UBs at compile-time*
 - Explicit by design (no implicit conversions, narrowing, epsilon-less floating point comparisions, ...)
@@ -48,7 +47,7 @@
 - Compiles cleanly with ([`-fno-exceptions -fno-rtti -Wall -Wextra -Werror -pedantic -pedantic-errors`](https://godbolt.org/z/ceK6qsx68))
 - Fast compilation times (see [compilation times](#comp))
 - Fast run-time execution (see [performance](#perf))
-- Verifies itself upon include (aka run all tests via static_asserts but it can be disabled - see [FAQ](#faq))
+- Verifies itself upon include (can be disabled with `-DNTEST` - see [FAQ](#faq))
 
 > Based on the `constexpr` ability of given compiler/standard
 
