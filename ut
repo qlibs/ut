@@ -38,7 +38,7 @@
 
 ### Features
 
-- Single header (https://raw.githubusercontent.com/qlibs/ut/main/ut - for integration see [FAQ](https://github.com/qlibs/.github/blob/main/profile/integration.md))
+- Single header (https://raw.githubusercontent.com/qlibs/ut/main/ut - for integration see [FAQ](https://github.com/qlibs/.github/blob/main/profile/INTEGRATION.md))
 - Compile-time first (executes tests at compile-time and/or run-time)
     - Detects memory leaks and UBs at compile-time*
 - Explicit by design (no implicit conversions, narrowing, epsilon-less floating point comparisions, ...)
@@ -47,7 +47,7 @@
 - Compiles cleanly with ([`-fno-exceptions -fno-rtti -Wall -Wextra -Werror -pedantic -pedantic-errors`](https://godbolt.org/z/ceK6qsx68))
 - Fast compilation times (see [compilation times](#comp))
 - Fast run-time execution (see [performance](#perf))
-- Verifies itself upon include (can be disabled with `-DNTEST` - see [FAQ](#faq))
+- Verifies itself upon include (can be disabled with `-DNTEST` - see [FAQ](https://github.com/qlibs/.github/blob/main/profile/NTEST.md))
 
 > Based on the `constexpr` ability of given compiler/standard
 
@@ -612,11 +612,6 @@ template <class...> inline auto cfg = default_cfg{};
 ---
 
 ### FAQ
-
-- Can I disable running tests at compile-time for faster compilation times?
-
-    > When `NTEST` is defined static_asserts tests wont be executed upon inclusion.
-    Note: Use with caution as disabling tests means that there are no guarantees upon inclusion that the given compiler/env combination works as expected.
 
 - Similar projects?
     > [ut](https://github.com/boost-ext/ut), [catch2](https://github.com/catchorg/Catch2), [googletest](https://github.com/google/googletest), [gunit](https://github.com/cpp-testing/GUnit), [boost.test](https://www.boost.org/doc/libs/latest/libs/test/doc/html/index.html)
