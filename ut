@@ -38,7 +38,7 @@
 
 ### Features
 
-- Single header (https://raw.githubusercontent.com/qlibs/ut/main/ut - for integration see [FAQ](#faq))
+- Single header (https://raw.githubusercontent.com/qlibs/ut/main/ut - for integration see [FAQ](https://github.com/qlibs/.github/blob/main/profile/integration.md))
 - Compile-time first (executes tests at compile-time and/or run-time)
     - Detects memory leaks and UBs at compile-time*
 - Explicit by design (no implicit conversions, narrowing, epsilon-less floating point comparisions, ...)
@@ -617,24 +617,6 @@ template <class...> inline auto cfg = default_cfg{};
 
     > When `NTEST` is defined static_asserts tests wont be executed upon inclusion.
     Note: Use with caution as disabling tests means that there are no guarantees upon inclusion that the given compiler/env combination works as expected.
-
-- How to integrate with [CMake.FetchContent](https://cmake.org/cmake/help/latest/module/FetchContent.html)?
-
-    ```
-    include(FetchContent)
-
-    FetchContent_Declare(
-      qlibs.ut
-      GIT_REPOSITORY https://github.com/qlibs/ut
-      GIT_TAG v2.1.2
-    )
-
-    FetchContent_MakeAvailable(qlibs.ut)
-    ```
-
-    ```
-    target_link_libraries(${PROJECT_NAME} PUBLIC qlibs.ut);
-    ```
 
 - Similar projects?
     > [ut](https://github.com/boost-ext/ut), [catch2](https://github.com/catchorg/Catch2), [googletest](https://github.com/google/googletest), [gunit](https://github.com/cpp-testing/GUnit), [boost.test](https://www.boost.org/doc/libs/latest/libs/test/doc/html/index.html)
