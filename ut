@@ -845,7 +845,7 @@ void failed(); /// fail in constexpr context
 inline constexpr struct {
   constexpr auto operator()(auto expr, const char* file_name = __builtin_FILE(), int line = __builtin_LINE()) const {
     if constexpr (constexpr auto supported = type_traits::is_same_v<bool, decltype(expr)> || !requires { static_cast<bool>(expr); }; supported) {
-      static_assert(!supported, "[ERROR] Expression required: expect(a == b)");
+      static_assert(!supported, "[ERROR] Expression required - `expect(lhs == rhs)`. For example: `expect(3_i == sum(1, 2))`.");
     } else {
       bool result{};
       if (result = static_cast<bool>(expr); __builtin_is_constant_evaluated()) {
@@ -862,7 +862,7 @@ inline constexpr struct {
   struct fatal_expr {
     constexpr fatal_expr(auto expr, const char* file_name = __builtin_FILE(), int line = __builtin_LINE()) {
       if constexpr (constexpr auto supported = type_traits::is_same_v<bool, decltype(expr)> || !requires { static_cast<bool>(expr); }; supported) {
-        static_assert(!supported, "[ERROR] Expression required: expect[a == b]");
+        static_assert(!supported, "[ERROR] Expression required - `expect[lhs == rhs]`. For example: `expect[3_i == sum(1, 2)]`.");
       } else {
         if (result = static_cast<bool>(expr); __builtin_is_constant_evaluated()) {
           if (!result) { detail::failed(); }
@@ -870,19 +870,29 @@ inline constexpr struct {
           detail::cfg(expr).reporter.on(events::assert_pass{file_name, line, expr});
         } else {
           detail::cfg(expr).reporter.on(events::assert_fail{file_name, line, expr});
-          detail::cfg(expr).reporter.on(events::fatal{});
         }
       }
     }
     bool result{};
   };
-  constexpr auto operator[](fatal_expr e) const { return log{e.result}; } /// multiple and/or default parameters requires C++23
+  constexpr auto operator[](fatal_expr e) const { return fatal_log{e.result}; } /// multiple and/or default parameters requires C++23
 
 private:
   struct log {
     template<class TMsg> constexpr const auto& operator<<(const TMsg& msg) const {
       detail::cfg(msg).outputter.on(events::log<TMsg>{msg, result});
       return *this;
+    }
+    bool result{};
+  };
+  template<auto tag = []{}>
+  struct fatal_log {
+    template<class TMsg> constexpr const auto& operator<<(const TMsg& msg) const {
+      detail::cfg(msg).outputter.on(events::log<TMsg>{msg, result});
+      return *this;
+    }
+    constexpr ~fatal_log() {
+      detail::cfg(tag).reporter.on(events::fatal{});
     }
     bool result{};
   };
@@ -913,7 +923,7 @@ template<class T> [[nodiscard]] constexpr auto& mut(const T& t) { return const_c
 
 template<class TLhs, class TRhs> struct eq {
   constexpr eq(const TLhs& lhs, const TRhs& rhs) : lhs{lhs}, rhs{rhs} { }
-  static_assert(type_traits::is_same_v<TLhs, TRhs>, "[ERROR] Comparision of different types is not allowed");
+  static_assert(type_traits::is_same_v<TLhs, TRhs>, "[ERROR] Comparision of different types is not allowed.");
   [[nodiscard]] constexpr explicit operator bool() const { return false; }
   const TLhs& lhs; const TRhs& rhs;
 };
@@ -927,7 +937,7 @@ template<class T> requires type_traits::is_floating_point_v<T> struct eq<T, T> {
   constexpr eq(const T& lhs, const T& rhs) : lhs{lhs}, rhs{rhs} { }
   constexpr friend auto operator<<(auto& os, const eq& expr) -> decltype(auto) { return (os << expr.lhs << " == " << expr.rhs); }
   [[nodiscard]] constexpr explicit operator bool() const {
-    static_assert(!type_traits::is_floating_point_v<T>, "[ERROR] Epsilon is required: expect((a == b)(epsilon))");
+    static_assert(!type_traits::is_floating_point_v<T>, "[ERROR] Epsilon is required - `expect((lhs == rhs)(epsilon))`. For example: `expect((4.2_f == sum(4.f, .2f))(.01f))`.");
     return {};
   }
   struct epsilon {
@@ -942,7 +952,7 @@ template<class T> requires type_traits::is_floating_point_v<T> struct eq<T, T> {
 template<class TLhs, class TRhs>
   requires requires(TLhs lhs, TRhs rhs) { lhs[0]; rhs[0]; lhs.size(); rhs.size(); }
 struct eq<TLhs, TRhs> {
-  static_assert(type_traits::is_same_v<decltype(utility::declval<TLhs>()[0]), decltype(utility::declval<TLhs>()[0])>, "[ERROR] Comparision of different underlying types is not allowed");
+  static_assert(type_traits::is_same_v<decltype(utility::declval<TLhs>()[0]), decltype(utility::declval<TLhs>()[0])>, "[ERROR] Comparision of different underlying types is not allowed.");
   constexpr eq(const TLhs& lhs, const TRhs& rhs) : lhs{lhs}, rhs{rhs}, result{
     [](const auto& lhs, const auto& rhs) {
       if (lhs.size() != rhs.size()) { return false; }
@@ -957,7 +967,7 @@ struct eq<TLhs, TRhs> {
 
 template<class TLhs, class TRhs> struct neq {
   constexpr neq(const TLhs& lhs, const TRhs& rhs) : lhs{lhs}, rhs{rhs} { }
-  static_assert(type_traits::is_same_v<TLhs, TRhs>, "[ERROR] Comparision of different types is not allowed");
+  static_assert(type_traits::is_same_v<TLhs, TRhs>, "[ERROR] Comparision of different types is not allowed.");
   [[nodiscard]] constexpr explicit operator bool() const { return false; }
   const TLhs& lhs; const TRhs& rhs;
 };
@@ -971,7 +981,7 @@ template<class T> requires type_traits::is_floating_point_v<T> struct neq<T, T> 
   constexpr neq(const T& lhs, const T& rhs) : lhs{lhs}, rhs{rhs} { }
   constexpr friend auto operator<<(auto& os, const neq& expr) -> decltype(auto) { return (os << expr.lhs << " != " << expr.rhs); }
   [[nodiscard]] constexpr explicit operator bool() const {
-    static_assert(!type_traits::is_floating_point_v<T>, "[ERROR] Epsilon is required: expect((a != b)(epsilon))");
+    static_assert(!type_traits::is_floating_point_v<T>, "[ERROR] Epsilon is required - `expect((lhs != rhs)(epsilon))`. For example: `expect((4.2_f != sum(4.f, .3f))(.01f))`.");
     return {};
   }
   struct epsilon {
@@ -986,7 +996,7 @@ template<class T> requires type_traits::is_floating_point_v<T> struct neq<T, T> 
 
 template<class TLhs, class TRhs> struct gt {
   constexpr gt(const TLhs& lhs, const TRhs& rhs) : lhs{lhs}, rhs{rhs} { }
-  static_assert(type_traits::is_same_v<TLhs, TRhs>, "[ERROR] Comparision of different types is not allowed");
+  static_assert(type_traits::is_same_v<TLhs, TRhs>, "[ERROR] Comparision of different types is not allowed.");
   [[nodiscard]] constexpr explicit operator bool() const { return false; }
   const TLhs& lhs; const TLhs& rhs;
 };
@@ -999,7 +1009,7 @@ template<class T> struct gt<T, T> {
 
 template<class TLhs, class TRhs> struct ge {
   constexpr ge(const TLhs& lhs, const TRhs& rhs) : lhs{lhs}, rhs{rhs} { }
-  static_assert(type_traits::is_same_v<TLhs, TRhs>, "[ERROR] Comparision of different types is not allowed");
+  static_assert(type_traits::is_same_v<TLhs, TRhs>, "[ERROR] Comparision of different types is not allowed.");
   [[nodiscard]] constexpr explicit operator bool() const { return false; }
   const TLhs& lhs; const TLhs& rhs;
 };
@@ -1012,7 +1022,7 @@ template<class T> struct ge<T, T> {
 
 template<class TLhs, class TRhs> struct lt {
   constexpr lt(const TLhs& lhs, const TRhs& rhs) : lhs{lhs}, rhs{rhs} { }
-  static_assert(type_traits::is_same_v<TLhs, TRhs>, "[ERROR] Comparision of different types is not allowed");
+  static_assert(type_traits::is_same_v<TLhs, TRhs>, "[ERROR] Comparision of different types is not allowed.");
   [[nodiscard]] constexpr explicit operator bool() const { return false; }
   const TLhs& lhs; const TLhs& rhs;
 };
@@ -1025,7 +1035,7 @@ template<class T> struct lt<T, T> {
 
 template<class TLhs, class TRhs> struct le {
   constexpr le(const TLhs& lhs, const TRhs& rhs) : lhs{lhs}, rhs{rhs} { }
-  static_assert(type_traits::is_same_v<TLhs, TRhs>, "[ERROR] Comparision of different types is not allowed");
+  static_assert(type_traits::is_same_v<TLhs, TRhs>, "[ERROR] Comparision of different types is not allowed.");
   [[nodiscard]] constexpr explicit operator bool() const { return false; }
   const TLhs& lhs; const TLhs& rhs;
 };
