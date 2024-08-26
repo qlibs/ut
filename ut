@@ -49,7 +49,7 @@
 - Fast run-time execution (see [performance](#perf))
 - Verifies itself upon include (can be disabled with `-DNTEST` - see [FAQ](https://github.com/qlibs/.github/blob/main/profile/NTEST.md))
 
-> Based on the `constexpr` ability of given compiler/standard
+> \*Based on the `constexpr` ability of given compiler/standard
 
 ### Requirements
 
