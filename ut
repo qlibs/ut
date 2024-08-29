@@ -757,7 +757,7 @@ struct runner {
       #ifndef UT_RUN_TIME_ONLY
         if constexpr (!type_traits::is_mutable_lambda_v<decltype(&Test::operator())> && !type_traits::has_capture_lambda_v<Test>) {
           reporter.on(events::test_begin<events::mode::compile_time>{file_name, line, name});
-          static_assert((test(), "[FAILED] Compile-time expectation failed. The error below should indicate the issue. If it's not an assertion it might be that the std and/or compiler don't support running the test at compile-time. In such case mark the test as `mutable` to force run-time only execution. For example: `\"run-time\"_test = [] mutable { ... }`."));
+          static_assert((test(), R"([FAILED] Compile-time expectation failed. The error below should indicate the issue. If it's not an assertion it might be that the std and/or compiler don't support running the test at compile-time. In such case mark the test as `mutable` to force run-time only execution. For example: `"run-time"_test = [] mutable { ... }`.)"));
           reporter.on(events::test_end<events::mode::compile_time>{file_name, line, name});
         }
       #endif
