@@ -757,7 +757,7 @@ struct runner {
       #ifndef UT_RUN_TIME_ONLY
         if constexpr (!type_traits::is_mutable_lambda_v<decltype(&Test::operator())> && !type_traits::has_capture_lambda_v<Test>) {
           reporter.on(events::test_begin<events::mode::compile_time>{file_name, line, name});
-          static_assert((test(), "[FAILED]"));
+          static_assert((test(), "[FAILED] Compile-time fix or run-time only execution required. For example: `"run-time"_test = [] mutable { ... }` will force run-time execution only."));
           reporter.on(events::test_end<events::mode::compile_time>{file_name, line, name});
         }
       #endif
