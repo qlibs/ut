@@ -515,10 +515,13 @@ enum class mode {
   compile_time
 };
 
-template<mode Mode>
-struct test_begin {
+template<class T>
+struct run {
+  T test{};
   const char* file_name{};
-  int line{}; const char* name{};
+  int line{};
+  const char* name{};
+  const char* filter{};
 };
 
 template<mode Mode>
@@ -620,6 +623,8 @@ template <class...> inline auto cfg = default_cfg{};
 
 #pragma once
 
+extern "C" char *getenv(const char *) throw();
+
 namespace ut::inline v2_1_2 {
 namespace type_traits {
 template<class, class> inline constexpr auto is_same_v = false;
@@ -643,9 +648,36 @@ template<unsigned Size> struct fixed_string {
   constexpr friend auto operator<<(auto& os, const fixed_string& fs) -> decltype(auto) { return os << fs.storage; }
   char storage[Size]{};
 };
+[[nodiscard]] constexpr auto match(const auto pattern, const auto str) -> bool {
+  if (not bool(pattern)) { return true; }
+  if (not *pattern) { return not *str; }
+
+  if (not *str) {
+    return pattern[0] == '*' ? match(&pattern[1], str) : false;
+  }
+
+  if (pattern[0] != '?' and pattern[0] != '*' and pattern[0] != str[0]) {
+    return false;
+  }
+
+  if (pattern[0] == '*') {
+    auto tmp = str;
+    auto i = 0u;
+    while (tmp++) {
+      if (match(&pattern[1], &str[i++])) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  return match(&pattern[1], &str[1]);
+}
 } // utility
 namespace events {
 enum class mode { run_time, compile_time };
+template<class T>
+struct run { T test{}; const char* file_name{}; int line{}; const char* name{}; const char* filter = getenv("UT_FILTER"); };
 template<mode Mode> struct test_begin { const char* file_name{}; int line{}; const char* name{}; };
 template<mode Mode> struct test_end { const char* file_name{}; int line{}; const char* name{}; enum { FAILED, PASSED, COMPILE_TIME } result{}; };
 template<class TExpr> struct assert_pass { const char* file_name{}; int line{}; TExpr expr{}; };
@@ -745,10 +777,10 @@ struct reporter {
 
 template<class TReporter>
 struct runner {
-  template<class Test> constexpr auto on(Test test, const char* file_name, int line, const char* name) -> bool {
+  template<class Test> constexpr auto on(events::run<Test> run) -> bool {
     if (__builtin_is_constant_evaluated()) {
       if constexpr (!type_traits::is_mutable_lambda_v<decltype(&Test::operator())>) {
-        test();
+        run.test();
         return true;
       } else {
         return false;
@@ -756,16 +788,18 @@ struct runner {
     } else {
       #ifndef UT_RUN_TIME_ONLY
         if constexpr (!type_traits::is_mutable_lambda_v<decltype(&Test::operator())> && !type_traits::has_capture_lambda_v<Test>) {
-          reporter.on(events::test_begin<events::mode::compile_time>{file_name, line, name});
-          static_assert((test(), R"([FAILED] Compile-time expectation failed. The error below should indicate the issue. If it's not an assertion it might be that the std and/or compiler don't support running the test at compile-time. In such case mark the test as `mutable` to force run-time only execution. For example: `"run-time"_test = [] mutable { ... }`.)"));
-          reporter.on(events::test_end<events::mode::compile_time>{file_name, line, name});
+          reporter.on(events::test_begin<events::mode::compile_time>{run.file_name, run.line, run.name});
+          static_assert((run.test(), R"([FAILED] Compile-time expectation failed. The error below should indicate the issue. If it's not an assertion it might be that the std and/or compiler don't support running the test at compile-time. In such case mark the test as `mutable` to force run-time only execution. For example: `"run-time"_test = [] mutable { ... }`.)"));
+          reporter.on(events::test_end<events::mode::compile_time>{run.file_name, run.line, run.name});
         }
       #endif
 
       #ifndef UT_COMPILE_TIME_ONLY
-        reporter.on(events::test_begin<events::mode::run_time>{file_name, line, name});
-        test();
-        reporter.on(events::test_end<events::mode::run_time>{file_name, line, name});
+        if (utility::match(run.filter, run.name)) {
+          reporter.on(events::test_begin<events::mode::run_time>{run.file_name, run.line, run.name});
+          run.test();
+          reporter.on(events::test_end<events::mode::run_time>{run.file_name, run.line, run.name});
+        }
       #endif
     }
     return true;
@@ -883,7 +917,7 @@ template<utility::fixed_string Name>
 struct test {
   struct run {
     template<class T> constexpr run(T test, const char* file_name = __builtin_FILE(), int line = __builtin_LINE())
-      : result{cfg(test).runner.on(test, file_name, line, Name.data())}
+      : result{cfg(test).runner.on(events::run{test, file_name, line, Name.data()})}
     { }
     bool result{};
   };
@@ -1182,6 +1216,28 @@ static_assert(([] {
     static_assert('o' == ut::utility::fixed_string{"foo"}[1]);
     static_assert('o' == ut::utility::fixed_string{"foo"}[2]);
     static_assert('\0' == ut::utility::fixed_string{"foo"}[3]);
+  }
+
+  // utility::match
+  {
+    static_assert(ut::utility::match("", ""));
+    static_assert(not ut::utility::match("", "foo"));
+    static_assert(ut::utility::match("*", ""));
+    static_assert(ut::utility::match("*", "foo"));
+    static_assert(ut::utility::match("*", "bar"));
+    static_assert(ut::utility::match("foo", "foo"));
+    static_assert(not ut::utility::match("foo", "bar"));
+    static_assert(not ut::utility::match("fo", "foo"));
+    static_assert(ut::utility::match("foo*", "foo"));
+    static_assert(ut::utility::match("foo*", "foo1"));
+    static_assert(ut::utility::match("foo*", "foo2"));
+    static_assert(ut::utility::match("foo*", "foo23"));
+    static_assert(ut::utility::match("foo?", "foo2"));
+    static_assert(ut::utility::match("foo?", "foo1"));
+    static_assert(ut::utility::match("foo??", "foo12"));
+    static_assert(ut::utility::match("foo?x", "foo1x"));
+    static_assert(ut::utility::match("foo?x", "foo2x"));
+    static_assert(not ut::utility::match("fo?xx", "fooxxx"));
   }
 
   // ut::detail::get
