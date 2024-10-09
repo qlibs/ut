@@ -677,7 +677,7 @@ template<unsigned Size> struct fixed_string {
 namespace events {
 enum class mode { run_time, compile_time };
 template<class T>
-struct run { T test{}; const char* file_name{}; int line{}; const char* name{}; const char* filter = getenv("UT_FILTER"); };
+struct run { T test{}; const char* file_name{}; int line{}; const char* name{}; const char* filter{}; };
 template<mode Mode> struct test_begin { const char* file_name{}; int line{}; const char* name{}; };
 template<mode Mode> struct test_end { const char* file_name{}; int line{}; const char* name{}; enum { FAILED, PASSED, COMPILE_TIME } result{}; };
 template<class TExpr> struct assert_pass { const char* file_name{}; int line{}; TExpr expr{}; };
@@ -917,7 +917,13 @@ template<utility::fixed_string Name>
 struct test {
   struct run {
     template<class T> constexpr run(T test, const char* file_name = __builtin_FILE(), int line = __builtin_LINE())
-      : result{cfg(test).runner.on(events::run{test, file_name, line, Name.data()})}
+      : result{[&] {
+          if (__builtin_is_constant_evaluated()) {
+            return cfg(test).runner.on(events::run{test, file_name, line, Name.data()});
+          } else {
+            return cfg(test).runner.on(events::run{test, file_name, line, Name.data(), getenv("UT_FILTER")});
+          }
+        }()}
     { }
     bool result{};
   };
