@@ -612,6 +612,11 @@ template <class...> inline auto cfg = default_cfg{};
                                 // will be executed
 ```
 
+```cpp
+UT_FILTER                       // If env is set only tests which match
+                                // regex will be executed
+```
+
 ---
 
 ### FAQ
