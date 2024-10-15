@@ -609,8 +609,8 @@ template <class...> inline auto cfg = default_cfg{};
 ```
 
 ```cpp
-#define UT_RUN_TIME             // Marks test at run-time only
-#define UT_COMPILE_TIME         // Marks test as compile-time only
+#define UT_RUN_TIME             // [mutable] Marks test at run-time only
+#define UT_COMPILE_TIME         // [consteval] Marks test as compile-time only
 ```
 
 ```cpp
