@@ -109,6 +109,8 @@ int main() {
 }
 ```
 
+> Note: `UT_RUN_TIME, UT_COMPILE_TIME` can be used instead `mutable, consteval`.
+
 ```sh
 $CXX example.cpp -std=c++20 # -DUT_COMPILE_TIME_ONLY
 ut:156:25: error: static_assert((test(), "[FAILED]"));
@@ -117,7 +119,7 @@ example.cpp:14:5:  note: in call to 'expect.operator()<ut::eq<int, int>>({6, 5})
 ```
 
 ```sh
-$CXX example.cpp -std=c++20 -o example -DUT_RUNTIME_ONLY && ./example
+$CXX example.cpp -std=c++20 -o example -DUT_RUN_TIME_ONLY && ./example
 example.cpp:14:FAILED:"sum": 6 == 5
 FAILED: tests: 3 (2 passed, 1 failed, 0 compile-time), asserts: 2 (1 passed, 1 failed)
 ```
@@ -272,6 +274,7 @@ struct custom_config {
   ::outputter outputter{};
   ut::reporter<decltype(outputter)> reporter{outputter};
   ut::runner<decltype(reporter)> runner{reporter};
+  const char* current_test_name{}; // optional
 };
 
 template<>
@@ -606,6 +609,11 @@ template <class...> inline auto cfg = default_cfg{};
 ```
 
 ```cpp
+#define UT_RUN_TIME             // Marks test at run-time only
+#define UT_COMPILE_TIME         // Marks test as compile-time only
+```
+
+```cpp
 #define UT_RUN_TIME_ONLY        // If defined tests will be executed
                                 // at run-time + static_assert tests
 #define UT_COMPILE_TIME_ONLY    // If defined only compile-time tests
@@ -627,6 +635,9 @@ UT_FILTER                       // If env is set only tests which match
 #endif
 
 #pragma once
+
+#define UT_RUN_TIME mutable
+#define UT_COMPILE_TIME consteval
 
 extern "C" char *getenv(const char *) throw();
 
@@ -821,21 +832,26 @@ extern basic_ostream<char, char_traits<char>> clog; // only used if defined
 } // namespace std
 
 namespace ut::inline v2_1_3 {
+namespace detail {
+struct stream {
+  friend constexpr decltype(auto) operator<<([[maybe_unused]] auto& os, [[maybe_unused]] const auto& t) {
+    #ifdef UT_COMPILE_TIME_ONLY
+      return os;
+    #else
+      static_assert(requires { std::clog << t; }, "[ERROR] No output supported: Consider #include <iostream> | ut::cfg<ut::override> = custom_cfg{} | #define UT_COMPILE_TIME_ONLY");
+      return (std::clog << t);
+    #endif
+  }
+};
+} // namespace detail
+
 template<class...>
 struct default_cfg {
-  struct {
-    friend constexpr decltype(auto) operator<<([[maybe_unused]] auto& os, [[maybe_unused]] const auto& t) {
-      #ifdef UT_COMPILE_TIME_ONLY
-        return os;
-      #else
-        static_assert(requires { std::clog << t; }, "[ERROR] No output supported: Consider #include <iostream> | ut::cfg<ut::override> = custom_cfg{} | #define UT_COMPILE_TIME_ONLY");
-        return (std::clog << t);
-      #endif
-    }
-  } stream;
+  detail::stream stream{};
   ut::outputter<decltype(stream)> outputter{stream};
   ut::reporter<decltype(outputter)> reporter{outputter};
   ut::runner<decltype(reporter)> runner{reporter};
+  const char* current_test_name{};
 };
 
 struct override { };
@@ -923,6 +939,9 @@ struct test {
   struct run {
     template<class T> constexpr run(T test, const char* file_name = __builtin_FILE(), int line = __builtin_LINE())
       : result{[&] {
+          if constexpr (requires { cfg(test).current_test_name; }) {
+            cfg(test).current_test_name = Name.data();
+          }
           if (__builtin_is_constant_evaluated()) {
             return cfg(test).runner.on(events::run{test, file_name, line, Name.data()});
           } else {
