@@ -109,7 +109,7 @@ int main() {
 }
 ```
 
-> Note: `UT_RUN_TIME, UT_COMPILE_TIME` can be used instead `mutable, consteval`.
+> Note: `UT_RUN_TIME, UT_COMPILE_TIME` can be used instead of `mutable, consteval`.
 
 ```sh
 $CXX example.cpp -std=c++20 # -DUT_COMPILE_TIME_ONLY
