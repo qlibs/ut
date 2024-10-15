@@ -939,12 +939,12 @@ struct test {
   struct run {
     template<class T> constexpr run(T test, const char* file_name = __builtin_FILE(), int line = __builtin_LINE())
       : result{[&] {
-          if constexpr (requires { cfg(test).current_test_name; }) {
-            cfg(test).current_test_name = Name.data();
-          }
           if (__builtin_is_constant_evaluated()) {
             return cfg(test).runner.on(events::run{test, file_name, line, Name.data()});
           } else {
+            if constexpr (requires { cfg(test).current_test_name; }) {
+              cfg(test).current_test_name = Name.data();
+            }
             return cfg(test).runner.on(events::run{test, file_name, line, Name.data(), getenv("UT_FILTER")});
           }
         }()}
