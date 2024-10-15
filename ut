@@ -310,7 +310,7 @@ time $CXX -x c++ -std=c++20 ut -c                  # 0.049s
 [ut]: time $CXX benchmark.cpp -std=c++20           # 0m0.813s
 [ut]: time $CXX benchmark.cpp -std=c++20 -DNTEST   # 0m0.758s
 -------------------------------------------------------------------------
-[ut] https://github.com/qlibs/ut/releases/tag/v2.1.3
+[ut] https://github.com/qlibs/ut/releases/tag/v2.1.4
 ```
 
 <a name="perf"></a>
@@ -641,7 +641,7 @@ UT_FILTER                       // If env is set only tests which match
 
 extern "C" char *getenv(const char *) throw();
 
-namespace ut::inline v2_1_3 {
+namespace ut::inline v2_1_4 {
 namespace type_traits {
 template<class, class> inline constexpr auto is_same_v = false;
 template<class T> inline constexpr auto is_same_v<T, T> = true;
@@ -831,7 +831,7 @@ template<class, class> class basic_ostream;
 extern basic_ostream<char, char_traits<char>> clog; // only used if defined
 } // namespace std
 
-namespace ut::inline v2_1_3 {
+namespace ut::inline v2_1_4 {
 namespace detail {
 struct stream {
   friend constexpr decltype(auto) operator<<([[maybe_unused]] auto& os, [[maybe_unused]] const auto& t) {
