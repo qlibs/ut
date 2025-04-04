@@ -1,3 +1,4 @@
+#include <iostream>
 // <!--
 // The MIT License (MIT)
 //
@@ -38,7 +39,7 @@
 
 ### Features
 
-- Single header (https://raw.githubusercontent.com/qlibs/ut/main/ut - for integration see [FAQ](https://github.com/qlibs/.github/blob/main/profile/INTEGRATION.md))
+- Single header (https://raw.githubusercontent.com/qlibs/ut/main/ut)
 - Compile-time first (executes tests at compile-time and/or run-time)
     - Detects memory leaks and UBs at compile-time*
 - Explicit by design (no implicit conversions, narrowing, epsilon-less floating point comparisions, ...)
@@ -875,9 +876,9 @@ void failed(); /// fail in constexpr context
 
 inline constexpr struct {
   constexpr auto operator()(auto expr, const char* file_name = __builtin_FILE(), int line = __builtin_LINE()) const {
-    if constexpr (constexpr auto supported = type_traits::is_same_v<bool, decltype(expr)> || !requires { static_cast<bool>(expr); }; supported) {
-      static_assert(!supported, "[ERROR] Expression required - `expect(lhs == rhs)`. For example: `expect(3_i == sum(1, 2))`.");
-    } else {
+    //if constexpr (constexpr auto supported = type_traits::is_same_v<bool, decltype(expr)> || !requires { static_cast<bool>(expr); }; supported) {
+      //static_assert(!supported, "[ERROR] Expression required - `expect(lhs == rhs)`. For example: `expect(3_i == sum(1, 2))`.");
+    //} else {
       bool result{};
       if (result = static_cast<bool>(expr); __builtin_is_constant_evaluated()) {
         if (!result) { detail::failed(); }
@@ -887,7 +888,7 @@ inline constexpr struct {
         detail::cfg(expr).reporter.on(events::assert_fail{file_name, line, expr});
       }
       return log{result};
-    }
+    //}
   }
 
   struct fatal_expr {
@@ -1099,6 +1100,7 @@ constexpr decltype(auto) get(const auto& t) {
 }
 } // namespace detail
 
+inline namespace dsl {
 [[nodiscard]] constexpr auto operator==(const auto& lhs, const auto& rhs) requires (requires { lhs.VALUE; } || requires { rhs.VALUE; }) {
   return eq{detail::get(lhs), detail::get(rhs)};
 }
@@ -1183,9 +1185,17 @@ struct _string {
 [[nodiscard]] constexpr auto operator""_u32(unsigned long long int value) { return _u32(value); }
 [[nodiscard]] constexpr auto operator""_u64(unsigned long long int value) { return _u64(value); }
 template<utility::fixed_string Str> [[nodiscard]] constexpr auto operator""_s() { return _string{Str.data(), Str.size()-1u}; }
+} // namespace dsl
 } // namespace ut
 
 using ut::operator""_test;
+
+[[nodiscard]] constexpr auto $test_name(auto&&... ts) {
+  if (auto&& name = ut::detail::cfg(ts...).current_test_name; name) {
+    return name;
+  }
+  return "";
+}
 
 #ifndef NTEST
 static_assert(([] {
