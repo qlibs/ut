@@ -1,4 +1,3 @@
-#include <iostream>
 // <!--
 // The MIT License (MIT)
 //
@@ -876,9 +875,9 @@ void failed(); /// fail in constexpr context
 
 inline constexpr struct {
   constexpr auto operator()(auto expr, const char* file_name = __builtin_FILE(), int line = __builtin_LINE()) const {
-    //if constexpr (constexpr auto supported = type_traits::is_same_v<bool, decltype(expr)> || !requires { static_cast<bool>(expr); }; supported) {
-      //static_assert(!supported, "[ERROR] Expression required - `expect(lhs == rhs)`. For example: `expect(3_i == sum(1, 2))`.");
-    //} else {
+    if constexpr (constexpr auto supported = type_traits::is_same_v<bool, decltype(expr)> || !requires { static_cast<bool>(expr); }; supported) {
+      static_assert(!supported, "[ERROR] Expression required - `expect(lhs == rhs)`. For example: `expect(3_i == sum(1, 2))`.");
+    } else {
       bool result{};
       if (result = static_cast<bool>(expr); __builtin_is_constant_evaluated()) {
         if (!result) { detail::failed(); }
@@ -888,7 +887,7 @@ inline constexpr struct {
         detail::cfg(expr).reporter.on(events::assert_fail{file_name, line, expr});
       }
       return log{result};
-    //}
+    }
   }
 
   struct fatal_expr {
@@ -1189,13 +1188,6 @@ template<utility::fixed_string Str> [[nodiscard]] constexpr auto operator""_s() 
 } // namespace ut
 
 using ut::operator""_test;
-
-[[nodiscard]] constexpr auto $test_name(auto&&... ts) {
-  if (auto&& name = ut::detail::cfg(ts...).current_test_name; name) {
-    return name;
-  }
-  return "";
-}
 
 #ifndef NTEST
 static_assert(([] {
