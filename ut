@@ -621,8 +621,8 @@ template <class...> inline auto cfg = default_cfg{};
 ```
 
 ```cpp
-UT_FILTER                       // If env is set only tests which match
-                                // regex will be executed
+env:UT_FILTER                   // If UT_FILTER environment variable is set
+                                // only tests which match regex will be executed
 ```
 
 ---
