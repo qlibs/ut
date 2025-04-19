@@ -38,7 +38,7 @@
 
 ### Features
 
-- Single header (https://raw.githubusercontent.com/qlibs/ut/main/ut)
+- Single header (https://raw.githubusercontent.com/qlibs/ut/main/ut) / C++20 module (https://raw.githubusercontent.com/qlibs/ut/main/ut.cppm)
 - Compile-time first (executes tests at compile-time and/or run-time)
     - Detects memory leaks and UBs at compile-time*
 - Explicit by design (no implicit conversions, narrowing, epsilon-less floating point comparisions, ...)
