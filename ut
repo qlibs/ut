@@ -23,7 +23,7 @@
 //
 #if 0
 // -->
-[Overview](#Overview) / [Examples](#Examples) / [API](#API) / [FAQ](#FAQ)
+[Overview](#Overview) / [Examples](#Examples) / [API](#API) / [FAQ](#FAQ) / [Resources](#Resources)
 
 ## UT: C++20 Unit-Testing library
 
@@ -54,8 +54,6 @@
 ### Requirements
 
 - C++20 ([gcc-12+, clang-16+](https://en.cppreference.com/w/cpp/compiler_support))
-
----
 
 ### Overview
 
@@ -227,8 +225,6 @@ int main() {
 }
 ```
 
----
-
 ### Examples
 
 > Reflection integration (https://godbolt.org/z/v8GG4hfbW)
@@ -291,8 +287,6 @@ int main() {
 $CXX example.cpp -std=c++20 -o example && ./example
 echo $? # 139 # no output
 ```
-
----
 
 <a name="comp"></a>
 ### Compilation times
@@ -361,8 +355,6 @@ main:
   xor  eax, eax
   ret
 ```
-
----
 
 ### API
 
@@ -625,12 +617,26 @@ env:UT_FILTER                   // If UT_FILTER environment variable is set
                                 // only tests which match regex will be executed
 ```
 
----
-
 ### FAQ
 
-- Similar projects?
-    > [ut](https://github.com/boost-ext/ut), [catch2](https://github.com/catchorg/Catch2), [googletest](https://github.com/google/googletest), [gunit](https://github.com/cpp-testing/GUnit), [boost.test](https://www.boost.org/doc/libs/latest/libs/test/doc/html/index.html)
+> - How to disable running tests at compile-time?
+>
+>   When `-DNTEST` is defined static_asserts tests wont be executed upon include.
+>   Note: Use with caution as disabling tests means that there are no gurantees upon include that given compiler/env combination works as expected.
+>
+> - Similar projects?
+>   [ut](https://github.com/boost-ext/ut), [catch2](https://github.com/catchorg/Catch2), [googletest](https://github.com/google/googletest), [gunit](https://github.com/cpp-testing/GUnit), [boost.test](https://www.boost.org/doc/libs/latest/libs/test/doc/html/index.html)
+
+### Resources
+
+> - "unit"_test: Implementing a Macro-free Unit Testing Framework from Scratch in C++20 - https://www.youtube.com/watch?v=-qAXShy1xiE
+> - Future of Testing With C++20 - https://www.youtube.com/watch?v=KlU0cb_tbuw
+> - Towards Painless Testing - https://www.youtube.com/watch?v=NVrZjT5lW5o
+
+### License
+
+> - [MIT](LICENSE)
+
 <!--
 #endif
 
